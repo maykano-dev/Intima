@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intima — Discreet Wellness Delivered</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --primary:    #7A9A6B;
+    --primary-lt: #A8BBA0;
+    --primary-xlt: #D4E4CD;
+    --cream:      #F7F3EE;
+    --warm:       #EDE6DE;
+    --forest:     #1E3226;
+    --forest-lt:  #3D5A4A;
+    --text:       #1A1A1A;
+    --muted:      #6B7280;
+    --white:      #FAFAF8;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--white);
+    color: var(--text);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed; top: 0; left: 0; z-index: 9999;
+    pointer-events: none;
+  }
+  .cursor-dot {
+    width: 8px; height: 8px;
+    background: var(--primary);
+    border-radius: 50%;
+    transform: translate(-50%,-50%);
+    transition: transform 0.1s;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1px solid var(--primary-lt);
+    border-radius: 50%;
+    transform: translate(-50%,-50%);
+    transition: transform 0.15s ease, width 0.3s, height 0.3s, border-color 0.3s;
+    position: absolute; top: 0; left: 0;
+  }
+  body:hover .cursor-ring { opacity: 1; }
+
+  /* Age Gate */
+  #age-gate {
+    position: fixed; inset: 0; z-index: 10000;
+    background: var(--forest);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+  }
+  #age-gate.hidden { opacity: 0; visibility: hidden; }
+  .age-gate-inner { text-align: center; padding: 3rem; max-width: 480px; }
+  .age-gate-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.5rem; font-weight: 300; letter-spacing: 0.15em;
+    color: var(--cream); margin-bottom: 0.5rem;
+  }
+  .age-gate-tagline {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: 1.1rem; color: var(--primary-lt); margin-bottom: 2.5rem; letter-spacing: 0.05em;
+  }
+  .age-gate-text {
+    font-size: 0.85rem; color: var(--primary-lt); line-height: 1.7; margin-bottom: 2rem;
+    letter-spacing: 0.03em;
+  }
+  .age-btn {
+    display: inline-block; padding: 0.85rem 2.5rem;
+    font-family: 'Inter', sans-serif; font-size: 0.8rem;
+    letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;
+    border: none; transition: all 0.3s;
+  }
+  .age-btn-yes {
+    background: var(--primary); color: var(--white); margin-right: 1rem;
+  }
+  .age-btn-yes:hover { background: var(--primary-lt); }
+  .age-btn-no {
+    background: transparent; color: var(--primary-lt);
+    border: 1px solid var(--forest-lt);
+  }
+  .age-btn-no:hover { border-color: var(--primary-lt); }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 1.4rem 4rem;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: background 0.4s, backdrop-filter 0.4s;
+  }
+  nav.scrolled {
+    background: rgba(250,250,248,0.92);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 1px 0 rgba(26,26,26,0.08);
+  }
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem; font-weight: 300; letter-spacing: 0.2em;
+    color: var(--forest); text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--muted); text-decoration: none; transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--forest); }
+  .nav-cta {
+    font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.6rem 1.6rem; background: var(--forest); color: var(--cream);
+    text-decoration: none; transition: background 0.3s;
+  }
+  .nav-cta:hover { background: var(--forest-lt); }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: grid; grid-template-columns: 1fr 1fr;
+    position: relative; overflow: hidden;
+  }
+  .hero-left {
+    background: var(--cream);
+    display: flex; flex-direction: column;
+    justify-content: center; padding: 8rem 5rem 5rem 6rem;
+    position: relative; z-index: 2;
+  }
+  .hero-eyebrow {
+    font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--primary); margin-bottom: 1.5rem;
+    opacity: 0; animation: fadeUp 0.8s 0.3s forwards;
+  }
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 5vw, 5.5rem);
+    font-weight: 300; line-height: 1.1; color: var(--forest);
+    margin-bottom: 1.5rem;
+    opacity: 0; animation: fadeUp 0.8s 0.5s forwards;
+  }
+  .hero-title em { font-style: italic; color: var(--primary); }
+  .hero-sub {
+    font-size: 1rem; line-height: 1.8; color: var(--muted);
+    max-width: 380px; margin-bottom: 3rem;
+    opacity: 0; animation: fadeUp 0.8s 0.7s forwards;
+  }
+  .hero-actions {
+    display: flex; gap: 1rem; align-items: center;
+    opacity: 0; animation: fadeUp 0.8s 0.9s forwards;
+  }
+  .btn-primary {
+    padding: 1rem 2.5rem; background: var(--forest); color: var(--cream);
+    font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase;
+    text-decoration: none; transition: all 0.3s; display: inline-block;
+  }
+  .btn-primary:hover { background: var(--primary); transform: translateY(-2px); }
+  .btn-ghost {
+    padding: 1rem 2.5rem; border: 1px solid var(--forest-lt); color: var(--forest);
+    font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase;
+    text-decoration: none; transition: all 0.3s; display: inline-block;
+  }
+  .btn-ghost:hover { background: var(--warm); }
+  .hero-trust {
+    margin-top: 4rem; display: flex; gap: 2.5rem;
+    opacity: 0; animation: fadeUp 0.8s 1.1s forwards;
+  }
+  .trust-item { display: flex; flex-direction: column; }
+  .trust-label {
+    font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 0.2rem;
+  }
+  .trust-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem; font-weight: 600; color: var(--forest);
+  }
+
+  .hero-right {
+    background: var(--forest);
+    position: relative; overflow: hidden;
+    opacity: 0; animation: fadeIn 1.2s 0.2s forwards;
+  }
+  .hero-right-inner {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .hero-visual {
+    width: 70%; aspect-ratio: 3/4;
+    background: linear-gradient(145deg, var(--forest-lt) 0%, rgba(122,154,107,0.3) 60%, transparent 100%);
+    border-radius: 60% 40% 55% 45% / 50% 55% 45% 50%;
+    position: relative;
+    animation: morphBlob 8s ease-in-out infinite;
+  }
+  .hero-visual::before {
+    content: '';
+    position: absolute; inset: 15%;
+    background: radial-gradient(circle at 40% 40%, rgba(168,187,160,0.4), transparent 70%);
+    border-radius: inherit;
+  }
+  .floating-tag {
+    position: absolute; background: rgba(247,243,238,0.1);
+    backdrop-filter: blur(8px); border: 1px solid rgba(247,243,238,0.2);
+    padding: 0.7rem 1.2rem; color: var(--cream);
+    font-size: 0.75rem; letter-spacing: 0.08em;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .tag1 { top: 22%; right: 8%; animation: float 4s ease-in-out infinite; }
+  .tag2 { bottom: 28%; left: 6%; animation: float 4s ease-in-out infinite 1.5s; }
+  .tag3 { top: 55%; right: 12%; animation: float 4s ease-in-out infinite 3s; }
+  .tag-icon { flex-shrink: 0; }
+
+  /* MARQUEE */
+  .marquee-bar {
+    background: var(--forest); padding: 1rem 0; overflow: hidden;
+  }
+  .marquee-track {
+    display: flex; gap: 0; white-space: nowrap;
+    animation: marquee 25s linear infinite;
+  }
+  .marquee-item {
+    flex-shrink: 0; padding: 0 3rem;
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: 1.1rem; color: var(--primary-lt); letter-spacing: 0.05em;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .marquee-dot { color: var(--primary); }
+
+  /* PROMISE STRIP */
+  .promise-strip {
+    background: var(--warm); padding: 3.5rem 6rem;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem;
+  }
+  .promise-item { text-align: center; }
+  .promise-icon {
+    width: 48px; height: 48px; margin: 0 auto 1rem;
+    background: var(--primary); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .promise-icon svg { width: 22px; height: 22px; }
+  .promise-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem; font-weight: 600; color: var(--forest); margin-bottom: 0.4rem;
+  }
+  .promise-desc {
+    font-size: 0.8rem; color: var(--muted); line-height: 1.6; letter-spacing: 0.02em;
+  }
+
+  /* CATEGORIES */
+  #categories {
+    padding: 7rem 6rem; background: var(--white);
+  }
+  .section-header { margin-bottom: 4rem; }
+  .section-eyebrow {
+    font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--primary); margin-bottom: 0.8rem;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 3.5vw, 3.2rem); font-weight: 300;
+    color: var(--forest); line-height: 1.2;
+  }
+  .section-title em { font-style: italic; color: var(--primary); }
+  .cat-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5px;
+    background: var(--warm);
+  }
+  .cat-card {
+    background: var(--white); padding: 3rem 2.5rem;
+    transition: background 0.3s; position: relative; overflow: hidden;
+    cursor: pointer;
+  }
+  .cat-card::after {
+    content: ''; position: absolute; bottom: 0; left: 0;
+    height: 3px; width: 0; background: var(--primary);
+    transition: width 0.4s ease;
+  }
+  .cat-card:hover { background: var(--cream); }
+  .cat-card:hover::after { width: 100%; }
+  .cat-num {
+    font-family: 'Playfair Display', serif; font-size: 0.85rem;
+    color: var(--primary-lt); letter-spacing: 0.1em; margin-bottom: 1.5rem;
+  }
+  .cat-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.7rem; font-weight: 300; color: var(--forest);
+    margin-bottom: 0.8rem; line-height: 1.2;
+  }
+  .cat-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.7; }
+  .cat-arrow {
+    margin-top: 1.5rem; font-size: 0.75rem; letter-spacing: 0.1em;
+    color: var(--primary); text-transform: uppercase;
+    display: flex; align-items: center; gap: 0.5rem;
+    transition: gap 0.3s;
+  }
+  .cat-card:hover .cat-arrow { gap: 1rem; }
+
+  /* WHY INTIMA */
+  #why {
+    padding: 8rem 6rem;
+    background: var(--forest);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center;
+  }
+  .why-left .section-eyebrow { color: var(--primary-lt); }
+  .why-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 4vw, 4rem); font-weight: 300;
+    color: var(--cream); line-height: 1.15; margin-bottom: 1.5rem;
+  }
+  .why-title em { font-style: italic; color: var(--primary-lt); }
+  .why-body {
+    font-size: 0.92rem; color: rgba(168,187,160,0.8);
+    line-height: 1.9; margin-bottom: 2.5rem;
+  }
+  .why-right { display: flex; flex-direction: column; gap: 1.5px; }
+  .why-item {
+    background: rgba(255,255,255,0.04);
+    padding: 2rem 2.5rem;
+    border-left: 2px solid transparent;
+    transition: all 0.3s;
+  }
+  .why-item:hover {
+    background: rgba(255,255,255,0.08);
+    border-left-color: var(--primary);
+  }
+  .why-item-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem; color: var(--cream); margin-bottom: 0.4rem;
+  }
+  .why-item-desc { font-size: 0.8rem; color: rgba(168,187,160,0.7); line-height: 1.7; }
+
+  /* DELIVERY */
+  #delivery {
+    padding: 7rem 6rem;
+    background: var(--cream);
+    text-align: center;
+  }
+  .delivery-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 3rem;
+    margin-top: 4rem;
+  }
+  .delivery-step {
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .step-num {
+    width: 56px; height: 56px;
+    background: var(--forest); color: var(--cream);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif; font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .step-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem; color: var(--forest); margin-bottom: 0.6rem;
+  }
+  .step-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.7; max-width: 220px; }
+  .connector {
+    position: relative;
+  }
+  .connector::after {
+    content: '— — —'; position: absolute;
+    top: 28px; right: -1.5rem;
+    color: var(--primary-lt); font-size: 0.9rem; letter-spacing: 0.2em;
+  }
+  .connector:last-child::after { display: none; }
+
+  /* TESTIMONIALS */
+  #testimonials {
+    padding: 7rem 6rem; background: var(--white);
+  }
+  .test-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-top: 4rem;
+  }
+  .test-card {
+    background: var(--warm); padding: 2.5rem;
+    border-top: 3px solid var(--primary-lt);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .test-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(30,50,38,0.08);
+  }
+  .test-quote {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: 1.15rem; color: var(--forest); line-height: 1.7; margin-bottom: 1.5rem;
+  }
+  .test-author { display: flex; align-items: center; gap: 0.8rem; }
+  .test-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--primary); display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--white);
+  }
+  .test-name { font-size: 0.8rem; font-weight: 500; color: var(--forest); }
+  .test-location { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.05em; }
+
+  /* NEWSLETTER */
+  #newsletter {
+    padding: 6rem; background: var(--forest-lt);
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+  }
+  .nl-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 3vw, 3rem); font-weight: 300;
+    color: var(--cream); margin-bottom: 0.8rem;
+  }
+  .nl-sub { font-size: 0.88rem; color: var(--primary-lt); margin-bottom: 2.5rem; line-height: 1.7; }
+  .nl-form { display: flex; gap: 0; max-width: 480px; width: 100%; }
+  .nl-input {
+    flex: 1; padding: 1rem 1.5rem;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(168,187,160,0.3);
+    border-right: none; color: var(--cream); font-family: 'Inter', sans-serif;
+    font-size: 0.88rem; outline: none;
+  }
+  .nl-input::placeholder { color: rgba(168,187,160,0.5); }
+  .nl-btn {
+    padding: 1rem 2rem; background: var(--primary); color: var(--white);
+    border: none; font-family: 'Inter', sans-serif;
+    font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+    transition: background 0.3s;
+  }
+  .nl-btn:hover { background: var(--primary-lt); }
+  .nl-note { font-size: 0.7rem; color: rgba(168,187,160,0.5); margin-top: 1rem; letter-spacing: 0.05em; }
+
+  /* FOOTER */
+  footer {
+    background: var(--forest); padding: 4rem 6rem 2rem;
+  }
+  .footer-top {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem;
+  }
+  .footer-brand-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem; font-weight: 300; color: var(--cream);
+    letter-spacing: 0.15em; margin-bottom: 0.8rem;
+  }
+  .footer-brand-desc {
+    font-size: 0.8rem; color: rgba(168,187,160,0.6); line-height: 1.8; max-width: 260px;
+  }
+  .footer-col-title {
+    font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--primary-lt); margin-bottom: 1.2rem;
+  }
+  .footer-links { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+  .footer-links a {
+    font-size: 0.82rem; color: rgba(168,187,160,0.6); text-decoration: none; transition: color 0.3s;
+  }
+  .footer-links a:hover { color: var(--cream); }
+  .footer-bottom {
+    border-top: 1px solid rgba(168,187,160,0.15); padding-top: 1.5rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-copy { font-size: 0.75rem; color: rgba(168,187,160,0.4); }
+  .footer-legal { display: flex; gap: 2rem; }
+  .footer-legal a { font-size: 0.72rem; color: rgba(168,187,160,0.4); text-decoration: none; }
+  .footer-legal a:hover { color: var(--primary-lt); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; } to { opacity: 1; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-10px); }
+  }
+  @keyframes morphBlob {
+    0%, 100% { border-radius: 60% 40% 55% 45% / 50% 55% 45% 50%; }
+    33%       { border-radius: 45% 55% 40% 60% / 55% 45% 60% 40%; }
+    66%       { border-radius: 55% 45% 60% 40% / 40% 60% 50% 55%; }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* Scroll reveal */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* MOBILE */
+  @media (max-width: 900px) {
+    nav { padding: 1.2rem 2rem; }
+    .nav-links { display: none; }
+    #hero { grid-template-columns: 1fr; }
+    .hero-right { min-height: 50vh; }
+    .hero-left { padding: 7rem 2rem 3rem; }
+    .promise-strip { grid-template-columns: 1fr 1fr; padding: 3rem 2rem; }
+    #categories { padding: 5rem 2rem; }
+    .cat-grid { grid-template-columns: 1fr; }
+    #why { grid-template-columns: 1fr; padding: 5rem 2rem; gap: 3rem; }
+    #delivery { padding: 5rem 2rem; }
+    .delivery-grid { grid-template-columns: 1fr; }
+    .connector::after { display: none; }
+    #testimonials { padding: 5rem 2rem; }
+    .test-grid { grid-template-columns: 1fr; }
+    #newsletter { padding: 4rem 2rem; }
+    .nl-form { flex-direction: column; }
+    .nl-input { border-right: 1px solid rgba(168,187,160,0.3); border-bottom: none; }
+    footer { padding: 3rem 2rem 1.5rem; }
+    .footer-top { grid-template-columns: 1fr 1fr; gap: 2rem; }
+    .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div class="cursor" id="cursor">
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+</div>
+
+<!-- Age Gate -->
+<div id="age-gate">
+  <div class="age-gate-inner">
+    <div class="age-gate-logo">Intima</div>
+    <div class="age-gate-tagline">Wellness. Privacy. You.</div>
+    <p class="age-gate-text">
+      This website contains content intended for adults only.<br>
+      By entering, you confirm that you are 18 years of age or older.
+    </p>
+    <button class="age-btn age-btn-yes" onclick="enterSite()">I am 18+ — Enter</button>
+    <button class="age-btn age-btn-no" onclick="window.location='https://google.com'">I am under 18 — Exit</button>
+  </div>
+</div>
+
+<!-- Navigation -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">Intima</a>
+  <ul class="nav-links">
+    <li><a href="#categories">Shop</a></li>
+    <li><a href="#why">About</a></li>
+    <li><a href="#delivery">Delivery</a></li>
+    <li><a href="#testimonials">Reviews</a></li>
+  </ul>
+  <a href="#categories" class="nav-cta">Shop Now</a>
+</nav>
+
+<!-- Hero -->
+<section id="hero">
+  <div class="hero-left">
+    <p class="hero-eyebrow">Ghana's Discreet Wellness Store</p>
+    <h1 class="hero-title">
+      Your wellness,<br>
+      your <em>privacy,</em><br>
+      delivered.
+    </h1>
+    <p class="hero-sub">
+      Premium intimate wellness products, delivered discreetly to your door across Ghana. 
+      Plain packaging. Anonymous checkout. No questions asked.
+    </p>
+    <div class="hero-actions">
+      <a href="#categories" class="btn-primary">Shop Now</a>
+      <a href="#why" class="btn-ghost">Our Promise</a>
+    </div>
+    <div class="hero-trust">
+      <div class="trust-item">
+        <span class="trust-label">Delivery</span>
+        <span class="trust-val">Same Day</span>
+      </div>
+      <div class="trust-item">
+        <span class="trust-label">Packaging</span>
+        <span class="trust-val">100% Discreet</span>
+      </div>
+      <div class="trust-item">
+        <span class="trust-label">Payment</span>
+        <span class="trust-val">MoMo &amp; Card</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="hero-right-inner">
+      <div class="hero-visual"></div>
+      <div class="floating-tag tag1">
+        <svg class="tag-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A8BBA0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Discreet Packaging
+      </div>
+      <div class="floating-tag tag2">
+        <svg class="tag-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A8BBA0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Same-Day Accra
+      </div>
+      <div class="floating-tag tag3">
+        <svg class="tag-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A8BBA0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        100% Private
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Marquee -->
+<div class="marquee-bar">
+  <div class="marquee-track">
+    <span class="marquee-item">Discreet Delivery<svg class="marquee-dot" width="8" height="8" viewBox="0 0 24 24" fill="#7A9A6B"><circle cx="12" cy="12" r="6"/></svg></span>
+    <span class="marquee-item">Plain Packaging<svg class="marquee-dot" width="8" height="8" viewBox="0 0 24 24" fill="#7A9A6B"><circle cx="12" cy="12" r="6"/></svg></span>
+    <span class="marquee-item">Anonymous Checkout<svg class="marquee-dot" width="8" height="8" viewBox="0 0 24 24" fill="#7A9A6B"><circle cx="12" cy="12" r="6"/></svg></span>
+    <span class="marquee-item">MTN MoMo Accepted<svg class="marquee-dot" width="8" height="8" viewBox="0 0 24 24" fill="#7A9A6B"><circle cx="12" cy="12" r="6"/></svg></span>
+    <span class="marquee-item">Same-Day Accra<svg class="marquee-dot" width="8" height="8" viewBox="0 0 24 24" fill="#7A9A6B"><circle cx="12" cy="12" r="6"/></svg></span>
+    <span class="marquee-item">Nationwide Delivery<svg class="marquee-dot" width="8" height="8" viewBox="0 0 24 24" fill="#7A9A6B"><circle cx="12" cy="12" r="6"/></svg></span>
+    <span class="marquee-item">Quality Guaranteed<svg class="marquee-dot" width="8" height="8" viewBox="0 0 24 24" fill="#7A9A6B"><circle cx="12" cy="12" r="6"/></svg></span>
+    <span class="marquee-item">Your Privacy First<svg class="marquee-dot" width="8" height="8" viewBox="0 0 24 24" fill="#7A9A6B"><circle cx="12" cy="12" r="6"/></svg></span>
+    <span class="marquee-item">Discreet Delivery<svg class="marquee-dot" width="8" height="8" viewBox="0 0 24 24" fill="#7A9A6B"><circle cx="12" cy="12" r="6"/></svg></span>
+    <span class="marquee-item">Plain Packaging<svg class="marquee-dot" width="8" height="8" viewBox="0 0 24 24" fill="#7A9A6B"><circle cx="12" cy="12" r="6"/></svg></span>
+    <span class="marquee-item">Anonymous Checkout<svg class="marquee-dot" width="8" height="8" viewBox="0 0 24 24" fill="#7A9A6B"><circle cx="12" cy="12" r="6"/></svg></span>
+    <span class="marquee-item">MTN MoMo Accepted<svg class="marquee-dot" width="8" height="8" viewBox="0 0 24 24" fill="#7A9A6B"><circle cx="12" cy="12" r="6"/></svg></span>
+    <span class="marquee-item">Same-Day Accra<svg class="marquee-dot" width="8" height="8" viewBox="0 0 24 24" fill="#7A9A6B"><circle cx="12" cy="12" r="6"/></svg></span>
+    <span class="marquee-item">Nationwide Delivery<svg class="marquee-dot" width="8" height="8" viewBox="0 0 24 24" fill="#7A9A6B"><circle cx="12" cy="12" r="6"/></svg></span>
+    <span class="marquee-item">Quality Guaranteed<svg class="marquee-dot" width="8" height="8" viewBox="0 0 24 24" fill="#7A9A6B"><circle cx="12" cy="12" r="6"/></svg></span>
+    <span class="marquee-item">Your Privacy First<svg class="marquee-dot" width="8" height="8" viewBox="0 0 24 24" fill="#7A9A6B"><circle cx="12" cy="12" r="6"/></svg></span>
+  </div>
+</div>
+
+<!-- Promise Strip -->
+<div class="promise-strip reveal">
+  <div class="promise-item">
+    <div class="promise-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#FAFAF8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.89 1.45l8 4A2 2 0 0122 7.24v9.53a2 2 0 01-1.11 1.79l-8 4a2 2 0 01-1.79 0l-8-4a2 2 0 01-1.1-1.8V7.24a2 2 0 011.11-1.79l8-4a2 2 0 011.78 0z"/><polyline points="2.32 6.16 12 11 21.68 6.16"/><line x1="12" y1="22.76" x2="12" y2="11"/></svg>
+    </div>
+    <div class="promise-title">Plain Packaging</div>
+    <div class="promise-desc">No brand names, no logos. Just a plain, unmarked box at your door.</div>
+  </div>
+  <div class="promise-item">
+    <div class="promise-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#FAFAF8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+    </div>
+    <div class="promise-title">Anonymous Checkout</div>
+    <div class="promise-desc">No account required. Your personal data stays yours.</div>
+  </div>
+  <div class="promise-item">
+    <div class="promise-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#FAFAF8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </div>
+    <div class="promise-title">Same-Day Delivery</div>
+    <div class="promise-desc">Order by 3pm in Accra and receive your package today.</div>
+  </div>
+  <div class="promise-item">
+    <div class="promise-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#FAFAF8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+    </div>
+    <div class="promise-title">Mobile Money</div>
+    <div class="promise-desc">Pay with MTN MoMo, Vodafone Cash, AirtelTigo, Visa or Mastercard.</div>
+  </div>
+</div>
+
+<!-- Categories -->
+<section id="categories">
+  <div class="section-header reveal">
+    <p class="section-eyebrow">Our Collections</p>
+    <h2 class="section-title">Everything you need,<br><em>nothing you don't</em></h2>
+  </div>
+  <div class="cat-grid reveal">
+    <div class="cat-card">
+      <div class="cat-num">01</div>
+      <div class="cat-name">Personal Wellness Devices</div>
+      <div class="cat-desc">Premium body-safe wellness massagers and personal care devices for relaxation and self-care.</div>
+      <div class="cat-arrow">Explore →</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-num">02</div>
+      <div class="cat-name">Couples Wellness</div>
+      <div class="cat-desc">Tools designed to enhance connection, intimacy, and communication between partners.</div>
+      <div class="cat-arrow">Explore →</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-num">03</div>
+      <div class="cat-name">Men's Vitality</div>
+      <div class="cat-desc">Performance support products and herbal vitality supplements for men's health and confidence.</div>
+      <div class="cat-arrow">Explore →</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-num">04</div>
+      <div class="cat-name">Lubricants & Enhancers</div>
+      <div class="cat-desc">Water-based, warming, and specialty formulas for comfort, sensitivity, and enhanced experience.</div>
+      <div class="cat-arrow">Explore →</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-num">05</div>
+      <div class="cat-name">Herbal Wellness</div>
+      <div class="cat-desc">Locally inspired vitality tonics and libido support supplements. Energy and drive, naturally.</div>
+      <div class="cat-arrow">Explore →</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-num">06</div>
+      <div class="cat-name">Accessories & Care</div>
+      <div class="cat-desc">Toy cleaners, storage solutions, intimate hygiene products, and protection essentials.</div>
+      <div class="cat-arrow">Explore →</div>
+    </div>
+  </div>
+</section>
+
+<!-- Why Intima -->
+<section id="why">
+  <div class="why-left">
+    <p class="section-eyebrow">Why Intima</p>
+    <h2 class="why-title">Built for<br><em>your comfort,</em><br>not ours.</h2>
+    <p class="why-body">
+      We built Intima because we know how uncomfortable it can be to walk into a store and ask for 
+      what you actually need. You deserve access to quality wellness products without the stares, 
+      the questions, or the embarrassment. That's why everything we do — from checkout to delivery — 
+      is designed around your privacy first.
+    </p>
+    <a href="#categories" class="btn-primary" style="background:var(--primary)">Shop the Collection</a>
+  </div>
+  <div class="why-right reveal">
+    <div class="why-item">
+      <div class="why-item-title">Body-Safe Quality Only</div>
+      <div class="why-item-desc">Every product is tested for body-safe materials. We only stock what we would use ourselves.</div>
+    </div>
+    <div class="why-item">
+      <div class="why-item-title">Honest, No-Hype Descriptions</div>
+      <div class="why-item-desc">No miracle claims. No fake promises. Just clear, accurate product information.</div>
+    </div>
+    <div class="why-item">
+      <div class="why-item-title">Discreet From Click to Door</div>
+      <div class="why-item-desc">Plain outer box. Neutral sender name. Discreet billing. Your neighbours will never know.</div>
+    </div>
+    <div class="why-item">
+      <div class="why-item-title">Real Customer Support</div>
+      <div class="why-item-desc">WhatsApp us any time. We reply within 30 minutes, Monday to Saturday.</div>
+    </div>
+    <div class="why-item">
+      <div class="why-item-title">Easy Returns</div>
+      <div class="why-item-desc">Not what you expected? We offer hassle-free returns on unopened products within 7 days.</div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section id="delivery">
+  <div class="section-header reveal">
+    <p class="section-eyebrow">How It Works</p>
+    <h2 class="section-title">From browse to door<br><em>in three steps</em></h2>
+  </div>
+  <div class="delivery-grid reveal">
+    <div class="delivery-step connector">
+      <div class="step-num">1</div>
+      <div class="step-title">Browse & Choose</div>
+      <div class="step-desc">Shop our curated catalogue. No account required. Guest checkout always available.</div>
+    </div>
+    <div class="delivery-step connector">
+      <div class="step-num">2</div>
+      <div class="step-title">Pay Securely</div>
+      <div class="step-desc">Pay with MTN MoMo, Vodafone Cash, AirtelTigo, card, or cash on delivery in Accra.</div>
+    </div>
+    <div class="delivery-step">
+      <div class="step-num">3</div>
+      <div class="step-title">Discreet Delivery</div>
+      <div class="step-desc">Plain, unmarked box delivered to your door. Same-day in Accra. 2–4 days nationwide.</div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section id="testimonials">
+  <div class="section-header reveal">
+    <p class="section-eyebrow">Customer Stories</p>
+    <h2 class="section-title">What our customers<br><em>are saying</em></h2>
+  </div>
+  <div class="test-grid reveal">
+    <div class="test-card">
+      <div class="test-quote">"I was nervous to order but the packaging was so discreet, even I didn't know what was inside until I opened it. Will definitely order again."</div>
+      <div class="test-author">
+        <div class="test-avatar">A</div>
+        <div>
+          <div class="test-name">Ama K.</div>
+          <div class="test-location">Accra, Ghana</div>
+        </div>
+      </div>
+    </div>
+    <div class="test-card">
+      <div class="test-quote">"Ordered at 10am and it arrived by 2pm. No weird packaging, no calls asking what's inside. Just fast, private service. Exactly what I needed."</div>
+      <div class="test-author">
+        <div class="test-avatar">K</div>
+        <div>
+          <div class="test-name">Kwame D.</div>
+          <div class="test-location">East Legon, Accra</div>
+        </div>
+      </div>
+    </div>
+    <div class="test-card">
+      <div class="test-quote">"Finally a Ghanaian store that takes privacy seriously. The product quality is great and the WhatsApp support team answered my questions immediately."</div>
+      <div class="test-author">
+        <div class="test-avatar">E</div>
+        <div>
+          <div class="test-name">Efua M.</div>
+          <div class="test-location">Kumasi, Ghana</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Newsletter -->
+<section id="newsletter">
+  <h2 class="nl-title reveal">Wellness tips, delivered privately.</h2>
+  <p class="nl-sub reveal">Join our discreet newsletter for exclusive offers, sexual health education,<br>and new arrivals. Unsubscribe any time.</p>
+  <form class="nl-form reveal" onsubmit="return false;">
+    <input type="email" class="nl-input" placeholder="Your email address">
+    <button class="nl-btn">Subscribe</button>
+  </form>
+  <p class="nl-note reveal">We never share your email. Ever.</p>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="footer-brand-name">Intima</div>
+      <div class="footer-brand-desc">Ghana's discreet sexual wellness store. Premium products, plain packaging, total privacy.</div>
+    </div>
+    <div>
+      <div class="footer-col-title">Shop</div>
+      <ul class="footer-links">
+        <li><a href="#">Wellness Devices</a></li>
+        <li><a href="#">Couples Wellness</a></li>
+        <li><a href="#">Men's Vitality</a></li>
+        <li><a href="#">Lubricants</a></li>
+        <li><a href="#">Herbal Wellness</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Help</div>
+      <ul class="footer-links">
+        <li><a href="#">FAQs</a></li>
+        <li><a href="#">Delivery Info</a></li>
+        <li><a href="#">Returns Policy</a></li>
+        <li><a href="#">Track Order</a></li>
+        <li><a href="#">WhatsApp Us</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Company</div>
+      <ul class="footer-links">
+        <li><a href="#">About Intima</a></li>
+        <li><a href="#">Our Promise</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li>
+        <li><a href="#">Contact Us</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">&copy; 2025 Intima. All rights reserved. Adults 18+ only.</span>
+    <div class="footer-legal">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+      <a href="#">Cookie Policy</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Age gate
+  function enterSite() {
+    document.getElementById('age-gate').classList.add('hidden');
+    sessionStorage.setItem('age-verified', '1');
+  }
+  if (sessionStorage.getItem('age-verified')) {
+    document.getElementById('age-gate').classList.add('hidden');
+  }
+
+  // Custom cursor
+  const dot  = document.getElementById('cursorDot');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  function animCursor() {
+    dot.style.left  = mx + 'px';
+    dot.style.top   = my + 'px';
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top  = ry + 'px';
+    requestAnimationFrame(animCursor);
+  }
+  animCursor();
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      ring.style.width = '56px'; ring.style.height = '56px';
+      ring.style.borderColor = 'var(--primary)';
+    });
+    el.addEventListener('mouseleave', () => {
+      ring.style.width = '36px'; ring.style.height = '36px';
+      ring.style.borderColor = 'var(--primary-lt)';
+    });
+  });
+
+  // Navbar scroll
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+  }, { threshold: 0.12 });
+  reveals.forEach(r => obs.observe(r));
+</script>
+</body>
+</html>
