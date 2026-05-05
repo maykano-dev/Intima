@@ -16,7 +16,7 @@ export default function WhySection() {
         <h2 className="font-serif text-[clamp(2.5rem,4vw,4rem)] font-light text-cream leading-[1.15] mb-6">
           Built for<br /><em className="italic text-primary-light">your comfort,</em><br />not ours.
         </h2>
-        <p className="text-[0.92rem] leading-[1.9] mb-10 opacity-80" style={{ color: 'rgba(168,184,160,0.8)' }}>
+        <p className="text-[0.92rem] leading-[1.9] mb-10 text-white/70">
           We built Intima because we know how uncomfortable it can be to walk into a store and ask for
           what you actually need. You deserve access to quality wellness products without the stares,
           the questions, or the embarrassment. That&apos;s why everything we do — from checkout to delivery —

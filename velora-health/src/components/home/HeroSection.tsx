@@ -9,7 +9,7 @@ export default function HeroSection() {
         <p className="text-[0.72rem] tracking-[0.2em] uppercase text-primary mb-6 opacity-0 animate-[fadeUp_0.8s_0.3s_forwards]">
           Ghana&apos;s Discreet Wellness Store
         </p>
-        <h1 className="font-serif text-[clamp(3rem,5vw,5.5rem)] font-light leading-[1.1] text-accent mb-6 opacity-0 animate-[fadeUp_0.8s_0.5s_forwards]">
+        <h1 className="font-serif text-[clamp(3rem,5vw,5.5rem)] font-light leading-[0.95] text-accent mb-6 opacity-0 animate-[fadeUp_0.8s_0.5s_forwards]">
           Your wellness,<br />
           your <em className="italic text-primary">privacy,</em><br />
           delivered.

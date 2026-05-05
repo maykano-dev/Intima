@@ -43,7 +43,7 @@ export default function Navbar() {
               <Image
                 src={intimaLogo}
                 alt="Intima"
-                className="w-[140px] h-auto object-contain"
+                className="h-10 w-auto object-contain dark:brightness-0 dark:invert"
                 priority
               />
             </div>
@@ -119,7 +119,7 @@ export default function Navbar() {
                 <Image
                   src={intimaLogo}
                   alt="Intima"
-                  className="w-[140px] h-auto object-contain"
+                  className="h-10 w-auto object-contain dark:brightness-0 dark:invert"
                 />
               </div>
             </Link>
