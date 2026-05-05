@@ -20,14 +20,14 @@ const productImages: Record<string, string[]> = {
 async function getExchangeRate(): Promise<number | null> {
   if (!isSupabaseConfigured()) return null
   try {
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()!
       .from('platform_settings')
-      .select('exchange_rate')
+      .select('exchange_rate_cny_to_ghs')
       .order('created_at', { ascending: false })
       .limit(1)
       .single()
-    if (error || !data?.exchange_rate) return null
-    return data.exchange_rate
+    if (error || !data?.exchange_rate_cny_to_ghs) return null
+    return Number(data.exchange_rate_cny_to_ghs)
   } catch {
     return null
   }
@@ -47,7 +47,9 @@ function mapProduct(p: SeedProduct, index: number, exchangeRate?: number | null)
     price_cny: p.price_cny,
     price_ghs: computedPriceGhs,
     compare_price_ghs: p.compare_price_ghs,
-    availability_status: p.availability_status || (p.in_stock ? 'in_stock' : 'out_of_stock'),
+    availability_status: p.availability_status || (p.in_stock ? 'in_ghana' : 'pre_order'),
+    delivery_profile: p.delivery_profile || 'standard',
+    lead_time: p.lead_time || '7-14 Days',
     images: productImages[p.slug] || [],
     category_id: p.category_id,
     category_name: cat?.name || null,
@@ -87,7 +89,7 @@ export async function GET(request: Request) {
     if (isSupabaseConfigured()) {
       try {
         if (slug) {
-          const { data, error } = await getSupabaseAdmin()
+          const { data, error } = await getSupabaseAdmin()!
             .from('products')
             .select('*, categories(name)')
             .eq('slug', slug)
@@ -101,18 +103,20 @@ export async function GET(request: Request) {
               category_name: data.categories?.name || null,
               categories: undefined,
               price_cny: data.price_cny || null,
-              availability_status: data.availability_status || (data.in_stock ? 'in_stock' : 'out_of_stock'),
-            })
+              availability_status: data.availability_status || (data.in_stock ? 'in_ghana' : 'pre_order'),
+              delivery_profile: data.delivery_profile || 'standard',
+              lead_time: data.lead_time || '7-14 Days',
+            });
           }
 
-          const seedIndex = seedProducts.findIndex((p) => p.slug === slug)
+          const seedIndex = seedProducts.findIndex((p) => p.slug === slug);
           if (seedIndex >= 0) {
-            return NextResponse.json(mapProduct(seedProducts[seedIndex], seedIndex, exchangeRate))
+            return NextResponse.json(mapProduct(seedProducts[seedIndex], seedIndex, exchangeRate));
           }
           return NextResponse.json(null, { status: 404 })
         }
 
-        let query = getSupabaseAdmin()
+        let query = getSupabaseAdmin()!
           .from('products')
           .select('*, categories(name)')
           .eq('in_stock', true)
@@ -136,7 +140,9 @@ export async function GET(request: Request) {
             category_name: (item.categories as { name?: string })?.name || null,
             categories: undefined,
             price_cny: item.price_cny || null,
-            availability_status: item.availability_status || ((item.in_stock as boolean) ? 'in_stock' : 'out_of_stock'),
+            availability_status: item.availability_status || ((item.in_stock as boolean) ? 'in_ghana' : 'pre_order'),
+            delivery_profile: item.delivery_profile || 'standard',
+            lead_time: item.lead_time || '7-14 Days',
           }))
           return NextResponse.json(transformed)
         }

@@ -5,15 +5,17 @@ export interface SeedProduct {
   benefits: string
   usage_guide: string
   material: string
-  price_ghs: number
   price_cny: number
+  price_ghs: number
   compare_price_ghs: number | null
   category_id: string
   in_stock: boolean
   is_featured: boolean
+  availability_status?: string
+  delivery_profile?: 'local' | 'standard'
+  lead_time?: string
   rating: number
   review_count: number
-  availability_status?: string
 }
 
 export const categories = [
@@ -82,6 +84,8 @@ export const products: SeedProduct[] = [
     category_id: 'vibrators',
     in_stock: true,
     is_featured: true,
+    delivery_profile: 'standard',
+    lead_time: '7-14 Days',
     rating: 4.6,
     review_count: 24,
   },
@@ -98,6 +102,8 @@ export const products: SeedProduct[] = [
     category_id: 'vibrators',
     in_stock: true,
     is_featured: true,
+    delivery_profile: 'standard',
+    lead_time: '7-14 Days',
     rating: 4.8,
     review_count: 37,
   },
@@ -114,6 +120,8 @@ export const products: SeedProduct[] = [
     category_id: 'vibrators',
     in_stock: true,
     is_featured: false,
+    delivery_profile: 'standard',
+    lead_time: '7-14 Days',
     rating: 4.9,
     review_count: 18,
   },
@@ -130,6 +138,8 @@ export const products: SeedProduct[] = [
     category_id: 'male-pleasure',
     in_stock: true,
     is_featured: true,
+    delivery_profile: 'standard',
+    lead_time: '7-14 Days',
     rating: 4.4,
     review_count: 21,
   },
@@ -146,6 +156,8 @@ export const products: SeedProduct[] = [
     category_id: 'male-pleasure',
     in_stock: true,
     is_featured: true,
+    delivery_profile: 'standard',
+    lead_time: '7-14 Days',
     rating: 4.5,
     review_count: 29,
   },
@@ -162,6 +174,8 @@ export const products: SeedProduct[] = [
     category_id: 'male-pleasure',
     in_stock: true,
     is_featured: true,
+    delivery_profile: 'local',
+    lead_time: '1-3 Days',
     rating: 4.3,
     review_count: 42,
   },
@@ -178,6 +192,8 @@ export const products: SeedProduct[] = [
     category_id: 'lubricants',
     in_stock: true,
     is_featured: true,
+    delivery_profile: 'local',
+    lead_time: '1-3 Days',
     rating: 4.7,
     review_count: 56,
   },
@@ -194,6 +210,8 @@ export const products: SeedProduct[] = [
     category_id: 'wellness',
     in_stock: true,
     is_featured: true,
+    delivery_profile: 'local',
+    lead_time: '1-3 Days',
     rating: 4.5,
     review_count: 33,
   },
@@ -210,6 +228,8 @@ export const products: SeedProduct[] = [
     category_id: 'lubricants',
     in_stock: true,
     is_featured: false,
+    delivery_profile: 'local',
+    lead_time: '1-3 Days',
     rating: 4.4,
     review_count: 19,
   },
@@ -226,6 +246,8 @@ export const products: SeedProduct[] = [
     category_id: 'anal',
     in_stock: true,
     is_featured: false,
+    delivery_profile: 'standard',
+    lead_time: '7-14 Days',
     rating: 4.6,
     review_count: 15,
   },
@@ -242,6 +264,8 @@ export const products: SeedProduct[] = [
     category_id: 'couples',
     in_stock: true,
     is_featured: true,
+    delivery_profile: 'standard',
+    lead_time: '7-14 Days',
     rating: 4.7,
     review_count: 11,
   },
@@ -258,6 +282,8 @@ export const products: SeedProduct[] = [
     category_id: 'wellness',
     in_stock: true,
     is_featured: false,
+    delivery_profile: 'local',
+    lead_time: '1-3 Days',
     rating: 4.2,
     review_count: 27,
   },

@@ -1,7 +1,7 @@
 export default function MarqueeBar() {
   const items = [
     'Discreet Delivery', 'Plain Packaging', 'Anonymous Checkout',
-    'MTN MoMo Accepted', 'Same-Day Accra', 'Nationwide Delivery',
+    'MTN MoMo Accepted', 'Sea & Air Freight', 'Nationwide Delivery',
     'Quality Guaranteed', 'Your Privacy First',
   ]
 

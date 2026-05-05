@@ -9,7 +9,7 @@ export async function GET(request: Request) {
 
     // Try fetching from Supabase first
     if (slug) {
-      const { data, error } = await getSupabaseAdmin()
+      const { data, error } = await getSupabaseAdmin()!
         .from('blog_posts')
         .select('*')
         .eq('slug', slug)
@@ -33,7 +33,7 @@ export async function GET(request: Request) {
     }
 
     // Try Supabase first
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()!
       .from('blog_posts')
       .select('*')
       .order('published_at', { ascending: false })

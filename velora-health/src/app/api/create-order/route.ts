@@ -5,7 +5,7 @@ import { generateOrderId, sanitizeInput } from '@/lib/utils'
 
 async function getUserId(): Promise<string | null> {
   try {
-    const supabase = getSupabase()
+    const supabase = getSupabase()!
     const { data } = await supabase.auth.getSession()
     return data.session?.user?.id || null
   } catch {
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     // Get exchange rate for shipping cost conversion
     let exchangeRate: number | null = null
     try {
-      const { data: rateData } = await getSupabaseAdmin()
+      const { data: rateData } = await getSupabaseAdmin()!
         .from('platform_settings')
         .select('exchange_rate')
         .order('created_at', { ascending: false })
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
       ? new Date(Date.now() + 49 * 86400000).toISOString().split('T')[0]
       : new Date(Date.now() + 13 * 86400000).toISOString().split('T')[0]
 
-    const { data: order, error: orderError } = await getSupabaseAdmin()
+    const { data: order, error: orderError } = await getSupabaseAdmin()!
       .from('orders')
       .insert({
         id: orderId,
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
       })
     )
 
-    const { error: itemsError } = await getSupabaseAdmin()
+    const { error: itemsError } = await getSupabaseAdmin()!
       .from('order_items')
       .insert(orderItems)
 
@@ -117,7 +117,7 @@ export async function PATCH(request: Request) {
       updateData.payment_status = status === 'paid' ? 'paid' : 'pending'
     }
 
-    const { error } = await getSupabaseAdmin()
+    const { error } = await getSupabaseAdmin()!
       .from('orders')
       .update(updateData)
       .eq('id', order_id)

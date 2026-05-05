@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       const orderId = metadata?.order_id
 
       if (orderId) {
-        await getSupabaseAdmin()
+        await getSupabaseAdmin()!
           .from('orders')
           .update({
             payment_reference: reference,
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
           .eq('id', orderId)
 
         // Fetch order for notification
-        const { data: order } = await getSupabaseAdmin()
+        const { data: order } = await getSupabaseAdmin()!
           .from('orders')
           .select('*')
           .eq('id', orderId)

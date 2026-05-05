@@ -1,13 +1,16 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect') || '/dashboard'
+  
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -31,10 +34,10 @@ export default function LoginPage() {
           if (profileData.profile?.role === 'admin') {
             router.push('/admin')
           } else {
-            router.push('/dashboard')
+            router.push(redirectTo)
           }
         } else {
-          router.push('/dashboard')
+          router.push(redirectTo)
         }
       } else {
         const data = await res.json()
@@ -48,19 +51,27 @@ export default function LoginPage() {
   }
 
   return (
+    <form onSubmit={handleLogin} className="space-y-4">
+      <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+      <Input label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+      {error && <p className="text-sm text-danger">{error}</p>}
+      <Button type="submit" variant="primary" size="lg" fullWidth loading={loading}>
+        Sign In
+      </Button>
+    </form>
+  )
+}
+
+export default function LoginPage() {
+  return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <div className="max-w-sm mx-auto">
         <h1 className="text-2xl font-bold text-center mb-2">Sign In</h1>
         <p className="text-muted text-center text-sm mb-8">Sign in to your Intima account</p>
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          <Input label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-          {error && <p className="text-sm text-danger">{error}</p>}
-          <Button type="submit" variant="primary" size="lg" fullWidth loading={loading}>
-            Sign In
-          </Button>
-        </form>
+        <Suspense fallback={<div className="h-64 flex items-center justify-center">Loading...</div>}>
+          <LoginForm />
+        </Suspense>
 
         <p className="text-center text-sm text-muted mt-6">
           Don&apos;t have an account?{' '}

@@ -6,6 +6,7 @@ export interface Product {
   benefits: string
   usage_guide: string
   material: string
+  price_cny: number
   price_ghs: number
   compare_price_ghs: number | null
   images: string[]
@@ -13,6 +14,9 @@ export interface Product {
   category_name?: string
   in_stock: boolean
   is_featured: boolean
+  availability_status: 'in_ghana' | 'pre_order'
+  delivery_profile: 'local' | 'standard'
+  lead_time: string
   rating: number
   review_count: number
   created_at: string
@@ -34,6 +38,8 @@ export interface CartItem {
   quantity: number
   image: string
   slug: string
+  delivery_profile?: 'local' | 'standard'
+  lead_time?: string
 }
 
 export interface CustomerInfo {

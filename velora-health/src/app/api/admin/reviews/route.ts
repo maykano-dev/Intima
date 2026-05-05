@@ -6,7 +6,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const approved = searchParams.get('approved')
 
-    let query = getSupabaseAdmin()
+    let query = getSupabaseAdmin()!
       .from('reviews')
       .select('*, products(name, slug)')
       .order('created_at', { ascending: false })
@@ -36,7 +36,7 @@ export async function PATCH(request: Request) {
     const updates: Record<string, boolean> = {}
     if (approved !== undefined) updates.approved = approved
 
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()!
       .from('reviews')
       .update(updates)
       .eq('id', id)
@@ -60,7 +60,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Review ID required' }, { status: 400 })
     }
 
-    const { error } = await getSupabaseAdmin()
+    const { error } = await getSupabaseAdmin()!
       .from('reviews')
       .delete()
       .eq('id', id)

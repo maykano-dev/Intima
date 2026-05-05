@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { isValidEmail } from '@/lib/utils'
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
+import { sendSubscribeWelcome } from '@/lib/email'
 
 export async function POST(request: Request) {
   try {
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const { error } = await getSupabaseAdmin()
+    const { error } = await getSupabaseAdmin()!
       .from('subscribers')
       .insert({ email: email.toLowerCase().trim() })
 
@@ -37,6 +38,8 @@ export async function POST(request: Request) {
       }
       throw error
     }
+
+    await sendSubscribeWelcome(email)
 
     return NextResponse.json(
       { message: 'Subscribed successfully' },

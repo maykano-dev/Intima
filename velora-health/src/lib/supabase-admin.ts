@@ -1,24 +1,30 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-
-function getEnv(name: string): string | null {
-  const val = process.env[name]
-  if (!val || val.includes('placeholder')) return null
-  return val
-}
+import { isSupabaseConfigured } from './supabase'
 
 let _client: SupabaseClient | null = null
 
-export function getSupabaseAdmin(): SupabaseClient {
+function getAdminClient(): SupabaseClient {
   if (!_client) {
-    const url = getEnv('NEXT_PUBLIC_SUPABASE_URL')
-    const key = getEnv('SUPABASE_SERVICE_ROLE_KEY')
-    if (!url || !key) {
-      throw new Error('Supabase not configured — check your .env.local')
-    }
-    _client = createClient(url, key, {
-      auth: { persistSession: false, autoRefreshToken: false },
-      global: { headers: { 'x-application-name': 'intima-admin' } },
-    })
+    _client = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: { persistSession: false, autoRefreshToken: false },
+        global: { headers: { 'x-application-name': 'intima-admin' } },
+      }
+    )
   }
   return _client
+}
+
+export function getSupabaseAdmin(): SupabaseClient | null {
+  if (!isSupabaseConfigured()) return null
+  return getAdminClient()
+}
+
+export function requireSupabaseAdmin(): SupabaseClient {
+  if (!isSupabaseConfigured()) {
+    throw new Error('Supabase not configured — this route requires a database')
+  }
+  return getAdminClient()
 }

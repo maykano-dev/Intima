@@ -8,7 +8,7 @@ export async function GET(request: Request) {
     const email = searchParams.get('email')
 
     if (id) {
-      const { data: order, error } = await getSupabaseAdmin()
+      const { data: order, error } = await getSupabaseAdmin()!
         .from('orders')
         .select('*, order_items(*)')
         .eq('id', id)
@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     }
 
     if (email) {
-      const { data: orders, error } = await getSupabaseAdmin()
+      const { data: orders, error } = await getSupabaseAdmin()!
         .from('orders')
         .select('*')
         .eq('customer_email', email)
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
       return NextResponse.json(orders || [])
     }
 
-    const { data: orders, error } = await getSupabaseAdmin()
+    const { data: orders, error } = await getSupabaseAdmin()!
       .from('orders')
       .select('*')
       .order('created_at', { ascending: false })
@@ -72,7 +72,7 @@ export async function PATCH(request: Request) {
       )
     }
 
-    const { error } = await getSupabaseAdmin()
+    const { error } = await getSupabaseAdmin()!
       .from('orders')
       .update({ status })
       .eq('id', order_id)

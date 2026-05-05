@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { sanitizeInput } from '@/lib/utils'
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
+import { sendContactNotification, sendContactConfirmation } from '@/lib/email'
 
 export async function POST(request: Request) {
   try {
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const { error } = await getSupabaseAdmin().from('contact_messages').insert({
+    const { error } = await getSupabaseAdmin()!.from('contact_messages').insert({
       name: sanitizeInput(name),
       email: sanitizeInput(email),
       subject: sanitizeInput(subject),
@@ -32,6 +33,11 @@ export async function POST(request: Request) {
     })
 
     if (error) throw error
+
+    await Promise.allSettled([
+      sendContactNotification(name, email, subject, message),
+      sendContactConfirmation(name, email),
+    ])
 
     return NextResponse.json(
       { message: 'Message sent successfully' },

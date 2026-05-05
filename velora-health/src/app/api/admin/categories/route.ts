@@ -4,7 +4,7 @@ import { sanitizeInput } from '@/lib/utils'
 
 export async function GET() {
   try {
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()!
       .from('categories')
       .select('*')
       .order('name')
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'ID, name, and slug are required' }, { status: 400 })
     }
 
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()!
       .from('categories')
       .insert({
         id,
@@ -61,7 +61,7 @@ export async function PATCH(request: Request) {
     if (description !== undefined) updates.description = sanitizeInput(description)
     if (image !== undefined) updates.image = image
 
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()!
       .from('categories')
       .update(updates)
       .eq('id', id)
@@ -85,7 +85,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Category ID required' }, { status: 400 })
     }
 
-    const { error } = await getSupabaseAdmin()
+    const { error } = await getSupabaseAdmin()!
       .from('categories')
       .delete()
       .eq('id', id)

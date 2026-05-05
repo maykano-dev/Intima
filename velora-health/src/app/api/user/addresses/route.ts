@@ -1,12 +1,18 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { getSupabase } from '@/lib/supabase'
+import { getSupabase, isSupabaseConfigured } from '@/lib/supabase'
+import { mockGetSession } from '@/lib/mock-auth'
 import { sanitizeInput } from '@/lib/utils'
 
 async function getUserId(): Promise<string | null> {
-  const supabase = getSupabase()
-  const { data } = await supabase.auth.getSession()
-  return data.session?.user?.id || null
+  if (isSupabaseConfigured()) {
+    const supabase = getSupabase()!
+    if (!supabase) return null
+    const { data } = await supabase.auth.getSession()
+    return data.session?.user?.id || null
+  }
+  const session = mockGetSession().data.session
+  return session?.user?.id || null
 }
 
 export async function GET() {
@@ -16,7 +22,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()!
       .from('customer_addresses')
       .select('*')
       .eq('user_id', userId)
@@ -46,13 +52,13 @@ export async function POST(request: Request) {
     }
 
     if (is_default) {
-      await getSupabaseAdmin()
+      await getSupabaseAdmin()!
         .from('customer_addresses')
         .update({ is_default: false })
         .eq('user_id', userId)
     }
 
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()!
       .from('customer_addresses')
       .insert({
         user_id: userId,
@@ -98,7 +104,7 @@ export async function PATCH(request: Request) {
     if (city !== undefined) updates.city = sanitizeInput(city)
     if (is_default !== undefined) {
       if (is_default) {
-        await getSupabaseAdmin()
+        await getSupabaseAdmin()!
           .from('customer_addresses')
           .update({ is_default: false })
           .eq('user_id', userId)
@@ -106,7 +112,7 @@ export async function PATCH(request: Request) {
       updates.is_default = is_default
     }
 
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()!
       .from('customer_addresses')
       .update(updates)
       .eq('id', id)
@@ -136,7 +142,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Address ID required' }, { status: 400 })
     }
 
-    const { error } = await getSupabaseAdmin()
+    const { error } = await getSupabaseAdmin()!
       .from('customer_addresses')
       .delete()
       .eq('id', id)

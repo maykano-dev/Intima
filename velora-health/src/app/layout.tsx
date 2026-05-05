@@ -6,8 +6,7 @@ import { ThemeProvider } from "@/components/layout/ThemeProvider"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import CartDrawer from "@/components/layout/CartDrawer"
-import AgeGate from "@/components/layout/AgeGate"
-import CustomCursor from "@/components/layout/CustomCursor"
+
 import RevealObserver from "@/components/layout/RevealObserver"
 
 export const metadata: Metadata = {
@@ -42,7 +41,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="h-full antialiased"
+      className="h-full antialiased dark"
       suppressHydrationWarning
     >
       <head>
@@ -54,9 +53,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               try {
+                document.documentElement.classList.add('dark');
                 var t = localStorage.getItem('intima-theme');
-                if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                if (t === 'dark') document.documentElement.classList.add('dark');
+                if (t === 'light') document.documentElement.classList.remove('dark');
               } catch(e) {}
             `,
           }}
@@ -69,11 +68,9 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <ThemeProvider>
           <CartProvider>
-            <CustomCursor />
             <RevealObserver />
-            <AgeGate />
             <Navbar />
-            <main className="flex-1">{children}</main>
+            <main className="flex-1 pt-28">{children}</main>
             <Footer />
             <CartDrawer />
           </CartProvider>

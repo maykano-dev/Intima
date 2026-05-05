@@ -1,12 +1,19 @@
 import { NextResponse } from 'next/server'
-import { getSupabase } from '@/lib/supabase'
+import { getSupabase, isSupabaseConfigured } from '@/lib/supabase'
+import { mockGetSession } from '@/lib/mock-auth'
 
 export async function GET() {
   try {
-    const supabase = getSupabase()
-    const { data, error } = await supabase.auth.getSession()
-    if (error) throw error
-    return NextResponse.json({ user: data.session?.user || null })
+    if (isSupabaseConfigured()) {
+      const supabase = getSupabase()!
+      if (!supabase) return NextResponse.json({ user: null })
+      const { data, error } = await supabase.auth.getSession()
+      if (error) throw error
+      return NextResponse.json({ user: data.session?.user || null })
+    }
+
+    const result = mockGetSession()
+    return NextResponse.json({ user: result.data.session?.user || null })
   } catch {
     return NextResponse.json({ user: null })
   }

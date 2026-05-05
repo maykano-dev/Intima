@@ -8,7 +8,7 @@ export async function GET(request: Request) {
     const monthly = searchParams.get('monthly')
 
     if (monthly === 'true') {
-      const { data, error } = await getSupabaseAdmin()
+      const { data, error } = await getSupabaseAdmin()!
         .from('monthly_stats')
         .select('*')
 
@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     const since = new Date()
     since.setDate(since.getDate() - period)
 
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()!
       .from('sales_summary')
       .select('*')
       .gte('sale_date', since.toISOString().split('T')[0])

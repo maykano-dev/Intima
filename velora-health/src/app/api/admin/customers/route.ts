@@ -3,14 +3,14 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 export async function GET() {
   try {
-    const { data: profiles, error: profilesError } = await getSupabaseAdmin()
+    const { data: profiles, error: profilesError } = await getSupabaseAdmin()!
       .from('profiles')
       .select('*')
       .order('created_at', { ascending: false })
 
     if (profilesError) throw profilesError
 
-    const { data: banned, error: bannedError } = await getSupabaseAdmin()
+    const { data: banned, error: bannedError } = await getSupabaseAdmin()!
       .from('banned_users')
       .select('user_id')
 
@@ -18,7 +18,7 @@ export async function GET() {
 
     const bannedIds = new Set((banned || []).map((b: { user_id: string }) => b.user_id))
 
-    const { data: orders, error: ordersError } = await getSupabaseAdmin()
+    const { data: orders, error: ordersError } = await getSupabaseAdmin()!
       .from('orders')
       .select('user_id, total')
       .not('user_id', 'is', null)
@@ -61,9 +61,9 @@ export async function POST(request: Request) {
     }
 
     if (action === 'ban') {
-      const { error } = await getSupabaseAdmin()
+      const { error } = await getSupabaseAdmin()!
         .from('banned_users')
-        .insert({ user_id, reason: reason || '', banned_by: (await getSupabaseAdmin().auth.getSession()).data.session?.user?.id || null })
+        .insert({ user_id, reason: reason || '', banned_by: (await getSupabaseAdmin()!.auth.getSession()).data.session?.user?.id || null })
 
       if (error) {
         if (error.code === '23505') {
@@ -76,9 +76,9 @@ export async function POST(request: Request) {
     }
 
     if (action === 'note') {
-      const { error } = await getSupabaseAdmin()
+      const { error } = await getSupabaseAdmin()!
         .from('customer_notes')
-        .insert({ user_id, note, created_by: (await getSupabaseAdmin().auth.getSession()).data.session?.user?.id || null })
+        .insert({ user_id, note, created_by: (await getSupabaseAdmin()!.auth.getSession()).data.session?.user?.id || null })
 
       if (error) throw error
       return NextResponse.json({ success: true })
@@ -100,12 +100,12 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'User ID required' }, { status: 400 })
     }
 
-    await getSupabaseAdmin().from('customer_notes').delete().eq('user_id', userId)
-    await getSupabaseAdmin().from('banned_users').delete().eq('user_id', userId)
-    await getSupabaseAdmin().from('customer_addresses').delete().eq('user_id', userId)
-    await getSupabaseAdmin().from('profiles').delete().eq('id', userId)
+    await getSupabaseAdmin()!.from('customer_notes').delete().eq('user_id', userId)
+    await getSupabaseAdmin()!.from('banned_users').delete().eq('user_id', userId)
+    await getSupabaseAdmin()!.from('customer_addresses').delete().eq('user_id', userId)
+    await getSupabaseAdmin()!.from('profiles').delete().eq('id', userId)
 
-    const { error } = await getSupabaseAdmin().auth.admin.deleteUser(userId)
+    const { error } = await getSupabaseAdmin()!.auth.admin.deleteUser(userId)
     if (error) throw error
 
     return NextResponse.json({ success: true })

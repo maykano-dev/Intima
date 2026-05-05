@@ -3,7 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 export async function GET() {
   try {
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()!
       .from('shipping_options')
       .select('*')
       .order('sort_order')
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Name and delivery days required' }, { status: 400 })
     }
 
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()!
       .from('shipping_options')
       .insert({
         name,
@@ -65,7 +65,7 @@ export async function PATCH(request: Request) {
     if (is_active !== undefined) updates.is_active = is_active
     if (sort_order !== undefined) updates.sort_order = parseInt(sort_order)
 
-    const { error } = await getSupabaseAdmin()
+    const { error } = await getSupabaseAdmin()!
       .from('shipping_options')
       .update(updates)
       .eq('id', id)

@@ -4,7 +4,7 @@ import { sanitizeInput, slugify } from '@/lib/utils'
 
 export async function GET() {
   try {
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()!
       .from('blog_posts')
       .select('*')
       .order('published_at', { ascending: false })
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
     const postSlug = slug || slugify(title)
 
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()!
       .from('blog_posts')
       .insert({
         title: sanitizeInput(title),
@@ -68,7 +68,7 @@ export async function PATCH(request: Request) {
     if (author !== undefined) updates.author = sanitizeInput(author)
     if (published_at !== undefined) updates.published_at = published_at
 
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()!
       .from('blog_posts')
       .update(updates)
       .eq('id', id)
@@ -92,7 +92,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Post ID required' }, { status: 400 })
     }
 
-    const { error } = await getSupabaseAdmin()
+    const { error } = await getSupabaseAdmin()!
       .from('blog_posts')
       .delete()
       .eq('id', id)

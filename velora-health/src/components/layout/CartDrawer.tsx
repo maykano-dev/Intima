@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useCart } from '@/components/cart/CartProvider'
@@ -8,6 +9,16 @@ import Button from '@/components/ui/Button'
 
 export default function CartDrawer() {
   const { items, isDrawerOpen, closeDrawer, subtotal, itemCount, updateQuantity, removeItem } = useCart()
+  const [user, setUser] = useState<{ email?: string } | null>(null)
+
+  useEffect(() => {
+    if (isDrawerOpen) {
+      fetch('/api/auth/session')
+        .then((r) => r.json())
+        .then((data) => setUser(data.user))
+        .catch(() => setUser(null))
+    }
+  }, [isDrawerOpen])
 
   return (
     <>
@@ -116,9 +127,9 @@ export default function CartDrawer() {
                 <span className="font-semibold">{formatPrice(subtotal)}</span>
               </div>
               <p className="text-xs text-muted">Delivery calculated at checkout</p>
-              <Link href="/checkout" onClick={closeDrawer}>
+              <Link href={user ? "/checkout" : "/login?redirect=/checkout"} onClick={closeDrawer}>
                 <Button variant="primary" fullWidth size="lg">
-                  Proceed to Checkout
+                  {user ? "Proceed to Checkout" : "Login to Checkout"}
                 </Button>
               </Link>
               <Link

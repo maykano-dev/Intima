@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { getSupabase } from '@/lib/supabase'
+import { getSupabase, isSupabaseConfigured } from '@/lib/supabase'
+import { mockSignUp } from '@/lib/mock-auth'
 
 export async function POST(request: Request) {
   try {
@@ -13,19 +14,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Password must be at least 6 characters' }, { status: 400 })
     }
 
-    const supabase = getSupabase()
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name: name || '' } },
-    })
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 })
+    if (isSupabaseConfigured()) {
+      const supabase = getSupabase()!
+      if (!supabase) throw new Error('Supabase not configured')
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: name || '' } },
+      })
+      if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+      return NextResponse.json(
+        { message: 'Account created. Check your email for confirmation.', user: data.user },
+        { status: 201 }
+      )
     }
 
+    const result = mockSignUp(email, password, name)
+    if (result.error) return NextResponse.json({ error: result.error.message }, { status: 400 })
     return NextResponse.json(
-      { message: 'Account created. Check your email for confirmation.', user: data.user },
+      { message: 'Account created successfully.', user: result.data.user },
       { status: 201 }
     )
   } catch (error) {

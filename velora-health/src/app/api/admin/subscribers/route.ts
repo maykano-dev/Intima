@@ -3,7 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 export async function GET() {
   try {
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()!
       .from('subscribers')
       .select('*')
       .order('created_at', { ascending: false })
@@ -25,7 +25,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Subscriber ID required' }, { status: 400 })
     }
 
-    const { error } = await getSupabaseAdmin()
+    const { error } = await getSupabaseAdmin()!
       .from('subscribers')
       .delete()
       .eq('id', id)

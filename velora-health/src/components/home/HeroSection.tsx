@@ -1,6 +1,8 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
+import intimaLogo from '@/assets/intimalogo.png'
 
 export default function HeroSection() {
   return (
@@ -28,7 +30,7 @@ export default function HeroSection() {
         </div>
         <div className="flex gap-10 mt-16 animate-[fadeUp_0.8s_1.1s_forwards]">
           {[
-            { label: 'Delivery', val: 'Same Day' },
+            { label: 'Shipping', val: 'Sea & Air' },
             { label: 'Packaging', val: '100% Discreet' },
             { label: 'Payment', val: 'MoMo & Card' },
           ].map((item) => (
@@ -41,14 +43,19 @@ export default function HeroSection() {
       </div>
       <div className="hero-right animate-[fadeIn_1.2s_0.2s_forwards]">
         <div className="hero-right-inner">
-          <div className="hero-visual" />
+          <Image
+            src={intimaLogo}
+            alt="Intima"
+            className="w-[250px] md:w-[350px] h-auto object-contain z-10 drop-shadow-2xl dark:brightness-0 dark:invert"
+            priority
+          />
           <div className="floating-tag tag1">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             Discreet Packaging
           </div>
           <div className="floating-tag tag2">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            Same-Day Accra
+            Worldwide Shipping
           </div>
           <div className="floating-tag tag3">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>

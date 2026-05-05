@@ -7,7 +7,7 @@ export async function GET(request: Request) {
     const id = searchParams.get('id')
     const status = searchParams.get('status')
 
-    let query = getSupabaseAdmin()
+    let query = getSupabaseAdmin()!
       .from('orders')
       .select('*, order_items(*)')
       .order('created_at', { ascending: false })
@@ -54,7 +54,7 @@ export async function PATCH(request: Request) {
     if (tracking_number !== undefined) updates.tracking_number = tracking_number
     if (estimated_delivery !== undefined) updates.estimated_delivery = estimated_delivery
 
-    const { error } = await getSupabaseAdmin()
+    const { error } = await getSupabaseAdmin()!
       .from('orders')
       .update(updates)
       .eq('id', order_id)
@@ -77,7 +77,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Order ID required' }, { status: 400 })
     }
 
-    const { error } = await getSupabaseAdmin()
+    const { error } = await getSupabaseAdmin()!
       .from('orders')
       .delete()
       .eq('id', id)

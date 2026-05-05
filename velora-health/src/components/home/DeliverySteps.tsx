@@ -2,7 +2,7 @@ export default function DeliverySteps() {
   const steps = [
     { num: '1', title: 'Browse & Choose', desc: 'Shop our curated catalogue. No account required. Guest checkout always available.' },
     { num: '2', title: 'Pay Securely', desc: 'Pay with MTN MoMo, Vodafone Cash, AirtelTigo, card, or cash on delivery in Accra.' },
-    { num: '3', title: 'Discreet Delivery', desc: 'Plain, unmarked box delivered to your door. Same-day in Accra. 2–4 days nationwide.' },
+    { num: '3', title: 'Discreet Delivery', desc: 'Plain, unmarked box delivered to your door. Sea (6-8 wks) or Air (10-16 days). Tracked.' },
   ]
 
   return (

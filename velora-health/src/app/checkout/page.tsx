@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/components/cart/CartProvider'
 import { formatPrice, sanitizeInput, isValidEmail, isValidGhanaPhone } from '@/lib/utils'
@@ -60,6 +60,14 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitting, setSubmitting] = useState(false)
   const [paymentLoading, setPaymentLoading] = useState(false)
+
+  const groups = useMemo(() => {
+    const local = items.filter((i) => i.delivery_profile === 'local')
+    const standard = items.filter((i) => i.delivery_profile !== 'local')
+    return { local, standard }
+  }, [items])
+
+  const isMixed = groups.local.length > 0 && groups.standard.length > 0
 
   const shippingOptions = {
     sea: { label: 'Sea Freight', price: 25, time: '6-8 weeks', desc: 'Budget-friendly option. Recommended for budget-conscious buyers.' },
@@ -298,15 +306,36 @@ export default function CheckoutPage() {
         <div className="lg:col-span-2">
           <div className="rounded-2xl border border-border p-6 sticky top-24">
             <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
-            <div className="space-y-3 mb-4">
-              {items.map((item) => (
-                <div key={item.id} className="flex justify-between text-sm">
-                  <span className="text-muted line-clamp-1">
-                    {item.name} x{item.quantity}
-                  </span>
-                  <span className="font-medium ml-2">{formatPrice(item.price_ghs * item.quantity)}</span>
+            {isMixed && (
+              <p className="text-xs text-muted mb-3 pb-3 border-b border-border">
+                Items may arrive in separate packages at different times.
+              </p>
+            )}
+            <div className="space-y-4 mb-4">
+              {groups.local.length > 0 && (
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-success font-semibold mb-2">Ready to Ship — In Stock Locally</p>
+                  {groups.local.map((item) => (
+                    <div key={item.id} className="flex justify-between text-sm py-1">
+                      <span className="text-muted line-clamp-1 flex-1">{item.name} x{item.quantity}</span>
+                      <span className="font-medium ml-2">{formatPrice(item.price_ghs * item.quantity)}</span>
+                    </div>
+                  ))}
+                  <p className="text-[10px] text-success/70 mt-1">Arrives in {groups.local[0]?.lead_time || '1-3 Days'}</p>
                 </div>
-              ))}
+              )}
+              {groups.standard.length > 0 && (
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-primary font-semibold mb-2">Standard Fulfillment</p>
+                  {groups.standard.map((item) => (
+                    <div key={item.id} className="flex justify-between text-sm py-1">
+                      <span className="text-muted line-clamp-1 flex-1">{item.name} x{item.quantity}</span>
+                      <span className="font-medium ml-2">{formatPrice(item.price_ghs * item.quantity)}</span>
+                    </div>
+                  ))}
+                  <p className="text-[10px] text-primary/70 mt-1">Arrives in {groups.standard[0]?.lead_time || '7-14 Days'}</p>
+                </div>
+              )}
             </div>
             <div className="border-t border-border pt-3 space-y-2 text-sm">
               <div className="flex justify-between">

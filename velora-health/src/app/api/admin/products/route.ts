@@ -4,7 +4,7 @@ import { sanitizeInput, slugify } from '@/lib/utils'
 
 export async function GET() {
   try {
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()!
       .from('products')
       .select('*, categories(name)')
       .order('created_at', { ascending: false })
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
 
     const productSlug = slug || slugify(name)
 
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()!
       .from('products')
       .insert({
         name: sanitizeInput(name),
@@ -85,7 +85,7 @@ export async function PATCH(request: Request) {
     if (in_stock !== undefined) updates.in_stock = in_stock
     if (is_featured !== undefined) updates.is_featured = is_featured
 
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()!
       .from('products')
       .update(updates)
       .eq('id', id)
@@ -109,7 +109,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Product ID required' }, { status: 400 })
     }
 
-    const { error } = await getSupabaseAdmin()
+    const { error } = await getSupabaseAdmin()!
       .from('products')
       .delete()
       .eq('id', id)

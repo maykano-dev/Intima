@@ -1,17 +1,26 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { getSupabase } from '@/lib/supabase'
+import { getSupabase, isSupabaseConfigured } from '@/lib/supabase'
+import { mockGetSession } from '@/lib/mock-auth'
 
 async function getUserId(): Promise<string | null> {
-  const supabase = getSupabase()
-  const { data } = await supabase.auth.getSession()
-  return data.session?.user?.id || null
+  if (isSupabaseConfigured()) {
+    const supabase = getSupabase()!
+    if (!supabase) return null
+    const { data } = await supabase.auth.getSession()
+    return data.session?.user?.id || null
+  }
+  return mockGetSession().data.session?.user?.id || null
 }
 
 async function getUserEmail(): Promise<string | null> {
-  const supabase = getSupabase()
-  const { data } = await supabase.auth.getSession()
-  return data.session?.user?.email || null
+  if (isSupabaseConfigured()) {
+    const supabase = getSupabase()!
+    if (!supabase) return null
+    const { data } = await supabase.auth.getSession()
+    return data.session?.user?.email || null
+  }
+  return mockGetSession().data.session?.user?.email || null
 }
 
 export async function GET(request: Request) {
@@ -26,7 +35,7 @@ export async function GET(request: Request) {
     const id = searchParams.get('id')
 
     if (id) {
-      const { data: order, error } = await getSupabaseAdmin()
+      const { data: order, error } = await getSupabaseAdmin()!
         .from('orders')
         .select('*, order_items(*)')
         .eq('id', id)
@@ -46,7 +55,7 @@ export async function GET(request: Request) {
       return NextResponse.json(order)
     }
 
-    let query = getSupabaseAdmin()
+    let query = getSupabaseAdmin()!
       .from('orders')
       .select('id, customer_name, total, status, payment_status, created_at, tracking_number, estimated_delivery')
       .order('created_at', { ascending: false })

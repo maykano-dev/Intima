@@ -25,14 +25,14 @@ export async function GET(request: Request) {
 
     // Try Supabase first
     try {
-      const { data: product } = await getSupabaseAdmin()
+      const { data: product } = await getSupabaseAdmin()!
         .from('products')
         .select('id')
         .eq('slug', productSlug)
         .single()
 
       if (product) {
-        const { data, error } = await getSupabaseAdmin()
+        const { data, error } = await getSupabaseAdmin()!
           .from('reviews')
           .select('*')
           .eq('product_id', product.id)
@@ -96,7 +96,7 @@ export async function POST(request: Request) {
 
     // Try Supabase first
     try {
-      const { error } = await getSupabaseAdmin().from('reviews').insert({
+      const { error } = await getSupabaseAdmin()!.from('reviews').insert({
         product_id,
         customer_name: sanitizeInput(name),
         rating: Math.min(5, Math.max(1, parseInt(rating))),

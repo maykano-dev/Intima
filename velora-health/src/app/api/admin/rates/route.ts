@@ -3,7 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 export async function GET() {
   try {
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()!
       .from('platform_settings')
       .select('*')
       .order('created_at', { ascending: false })
@@ -33,21 +33,21 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'Invalid exchange rate' }, { status: 400 })
     }
 
-    const { data: existing } = await getSupabaseAdmin()
+    const { data: existing } = await getSupabaseAdmin()!
       .from('platform_settings')
       .select('id')
       .limit(1)
       .single()
 
     if (existing) {
-      const { error } = await getSupabaseAdmin()
+      const { error } = await getSupabaseAdmin()!
         .from('platform_settings')
         .update({ exchange_rate_cny_to_ghs })
         .eq('id', existing.id)
 
       if (error) throw error
     } else {
-      const { error } = await getSupabaseAdmin()
+      const { error } = await getSupabaseAdmin()!
         .from('platform_settings')
         .insert({ exchange_rate_cny_to_ghs })
 

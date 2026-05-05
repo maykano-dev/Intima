@@ -6,7 +6,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const unread = searchParams.get('unread')
 
-    let query = getSupabaseAdmin()
+    let query = getSupabaseAdmin()!
       .from('contact_messages')
       .select('*')
       .order('created_at', { ascending: false })
@@ -32,7 +32,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'Message ID required' }, { status: 400 })
     }
 
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()!
       .from('contact_messages')
       .update({ read: read ?? true })
       .eq('id', id)
@@ -56,7 +56,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Message ID required' }, { status: 400 })
     }
 
-    const { error } = await getSupabaseAdmin()
+    const { error } = await getSupabaseAdmin()!
       .from('contact_messages')
       .delete()
       .eq('id', id)
