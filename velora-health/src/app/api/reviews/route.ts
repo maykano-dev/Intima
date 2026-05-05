@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-admin'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { sanitizeInput } from '@/lib/utils'
 
 const mockReviews = [
@@ -24,14 +24,14 @@ export async function GET(request: Request) {
 
     // Try Supabase first
     try {
-      const { data: product } = await supabaseAdmin
+      const { data: product } = await getSupabaseAdmin()
         .from('products')
         .select('id')
         .eq('slug', productSlug)
         .single()
 
       if (product) {
-        const { data, error } = await supabaseAdmin
+        const { data, error } = await getSupabaseAdmin()
           .from('reviews')
           .select('*')
           .eq('product_id', product.id)
@@ -86,7 +86,7 @@ export async function POST(request: Request) {
 
     // Try Supabase first
     try {
-      const { error } = await supabaseAdmin.from('reviews').insert({
+      const { error } = await getSupabaseAdmin().from('reviews').insert({
         product_id,
         customer_name: sanitizeInput(name),
         rating: Math.min(5, Math.max(1, parseInt(rating))),

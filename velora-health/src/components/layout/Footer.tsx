@@ -5,16 +5,17 @@ const footerLinks = {
     title: 'Shop',
     links: [
       { href: '/shop', label: 'All Products' },
-      { href: '/shop?vibrators', label: 'Vibrators' },
-      { href: '/shop?male-pleasure', label: 'Male Pleasure' },
-      { href: '/shop?couples', label: 'Couples' },
-      { href: '/shop?lubricants', label: 'Lubricants' },
+      { href: '/shop?category=vibrators', label: 'Vibrators' },
+      { href: '/shop?category=male-pleasure', label: 'Male Pleasure' },
+      { href: '/shop?category=couples', label: 'Couples' },
+      { href: '/shop?category=lubricants', label: 'Lubricants' },
     ],
   },
   support: {
     title: 'Support',
     links: [
       { href: '/faq', label: 'FAQ' },
+      { href: '/track', label: 'Track Order' },
       { href: '/contact', label: 'Contact Us' },
       { href: '/privacy-policy', label: 'Privacy Policy' },
       { href: '/terms', label: 'Terms of Service' },

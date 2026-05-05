@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useCart } from '@/components/cart/CartProvider'
 import { formatPrice } from '@/lib/utils'
@@ -54,8 +55,20 @@ export default function CartDrawer() {
               <ul className="space-y-4">
                 {items.map((item) => (
                   <li key={item.id} className="flex gap-4 p-3 rounded-xl bg-secondary/50">
-                    <div className="w-16 h-16 rounded-lg bg-primary/10 flex-shrink-0 flex items-center justify-center overflow-hidden">
-                      <span className="text-primary text-lg">&#x2764;</span>
+                    <div className="relative w-16 h-16 rounded-lg bg-primary/10 flex-shrink-0 overflow-hidden">
+                      {item.image ? (
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          fill
+                          className="object-cover"
+                          sizes="64px"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="text-primary text-lg">&#x2764;</span>
+                        </div>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <Link

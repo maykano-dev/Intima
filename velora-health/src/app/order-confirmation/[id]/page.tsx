@@ -1,12 +1,13 @@
 'use client'
 
 import { useEffect, useState, Suspense } from 'react'
-import { useParams, useSearchParams } from 'next/navigation'
+import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Button from '@/components/ui/Button'
 
 function OrderConfirmationContent() {
   const { id } = useParams()
+  const router = useRouter()
   const searchParams = useSearchParams()
   const reference = searchParams.get('ref')
 
@@ -16,8 +17,10 @@ function OrderConfirmationContent() {
     if (countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000)
       return () => clearTimeout(timer)
+    } else {
+      router.push('/')
     }
-  }, [countdown])
+  }, [countdown, router])
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

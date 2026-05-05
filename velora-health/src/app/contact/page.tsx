@@ -48,7 +48,7 @@ export default function ContactPage() {
 
         <div className="grid sm:grid-cols-2 gap-4 mb-10">
           <a
-            href="https://wa.me/233XXXXXXXXX"
+            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '233XXXXXXXXX'}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 p-4 rounded-2xl border border-border hover:bg-secondary transition-colors"

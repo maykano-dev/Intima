@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useCart } from '@/components/cart/CartProvider'
 import { formatPrice, truncate, cn } from '@/lib/utils'
@@ -20,10 +21,22 @@ export default function ProductCard({ product, variant = 'default' }: ProductCar
     )}>
       <Link href={`/product/${product.slug}`} className="block">
         <div className={cn(
-          'relative aspect-square bg-secondary flex items-center justify-center overflow-hidden',
+          'relative aspect-square bg-secondary overflow-hidden',
           variant === 'compact' && 'aspect-[4/3]'
         )}>
-          <span className="text-4xl opacity-30 select-none">&#x2764;</span>
+          {product.images[0] ? (
+            <Image
+              src={product.images[0]}
+              alt={product.name}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <span className="text-4xl opacity-30 select-none">&#x2764;</span>
+            </div>
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
       </Link>

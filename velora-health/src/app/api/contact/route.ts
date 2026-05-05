@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-admin'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { sanitizeInput } from '@/lib/utils'
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
 
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const { error } = await supabaseAdmin.from('contact_messages').insert({
+    const { error } = await getSupabaseAdmin().from('contact_messages').insert({
       name: sanitizeInput(name),
       email: sanitizeInput(email),
       subject: sanitizeInput(subject),

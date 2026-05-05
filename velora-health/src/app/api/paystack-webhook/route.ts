@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
-import { supabaseAdmin } from '@/lib/supabase-admin'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { getPaystackSecretKey } from '@/lib/paystack'
 
 export async function POST(request: Request) {
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       const orderId = metadata?.order_id
 
       if (orderId) {
-        await supabaseAdmin
+        await getSupabaseAdmin()
           .from('orders')
           .update({
             payment_reference: reference,
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
           .eq('id', orderId)
 
         // Fetch order for notification
-        const { data: order } = await supabaseAdmin
+        const { data: order } = await getSupabaseAdmin()
           .from('orders')
           .select('*')
           .eq('id', orderId)

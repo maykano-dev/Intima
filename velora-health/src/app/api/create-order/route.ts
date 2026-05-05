@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-admin'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { generateOrderId, sanitizeInput } from '@/lib/utils'
 
 export async function POST(request: Request) {
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
 
     const orderId = generateOrderId()
 
-    const { data: order, error: orderError } = await supabaseAdmin
+    const { data: order, error: orderError } = await getSupabaseAdmin()
       .from('orders')
       .insert({
         id: orderId,
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
       })
     )
 
-    const { error: itemsError } = await supabaseAdmin
+    const { error: itemsError } = await getSupabaseAdmin()
       .from('order_items')
       .insert(orderItems)
 
@@ -82,7 +82,7 @@ export async function PATCH(request: Request) {
       updateData.payment_status = status === 'paid' ? 'paid' : 'pending'
     }
 
-    const { error } = await supabaseAdmin
+    const { error } = await getSupabaseAdmin()
       .from('orders')
       .update(updateData)
       .eq('id', order_id)

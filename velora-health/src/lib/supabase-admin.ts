@@ -1,16 +1,24 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+function getEnv(name: string): string | null {
+  const val = process.env[name]
+  if (!val || val.includes('placeholder')) return null
+  return val
+}
 
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    persistSession: false,
-    autoRefreshToken: false,
-  },
-  global: {
-    headers: {
-      'x-application-name': 'intima-admin',
-    },
-  },
-})
+let _client: SupabaseClient | null = null
+
+export function getSupabaseAdmin(): SupabaseClient {
+  if (!_client) {
+    const url = getEnv('NEXT_PUBLIC_SUPABASE_URL')
+    const key = getEnv('SUPABASE_SERVICE_ROLE_KEY')
+    if (!url || !key) {
+      throw new Error('Supabase not configured — check your .env.local')
+    }
+    _client = createClient(url, key, {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { headers: { 'x-application-name': 'intima-admin' } },
+    })
+  }
+  return _client
+}

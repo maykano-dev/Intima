@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useCart } from '@/components/cart/CartProvider'
 import { cn } from '@/lib/utils'
 import ThemeToggle from '@/components/layout/ThemeToggle'
+import intimaLogo from '@/assets/intimalogo.png'
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -36,13 +38,17 @@ export default function Navbar() {
     <header className="sticky top-0 z-30 bg-card/95 backdrop-blur-md border-b border-border">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-white text-sm font-bold">I</span>
+          <Link href="/" className="flex items-center">
+            <div className="overflow-hidden rounded-md flex items-center">
+              <Image
+                src={intimaLogo}
+                alt="Intima"
+                width={140}
+                height={45}
+                className="object-contain"
+                priority
+              />
             </div>
-            <span className="text-lg font-bold tracking-tight">
-              Intima
-            </span>
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
@@ -110,11 +116,16 @@ export default function Navbar() {
       >
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between p-5 border-b border-border">
-            <Link href="/" onClick={closeMobile} className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-white text-sm font-bold">I</span>
+            <Link href="/" onClick={closeMobile} className="flex items-center">
+              <div className="overflow-hidden rounded-md flex items-center">
+                <Image
+                  src={intimaLogo}
+                  alt="Intima"
+                  width={140}
+                  height={45}
+                  className="object-contain"
+                />
               </div>
-              <span className="text-lg font-bold tracking-tight">Intima</span>
             </Link>
             <button
               onClick={closeMobile}

@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useCallback, useRef, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
 
 type Theme = 'light' | 'dark'
 
@@ -12,29 +12,37 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | null>(null)
 
-function getInitialTheme(): Theme {
-  if (typeof window !== 'undefined') {
+function getTheme(): Theme {
+  try {
     const stored = localStorage.getItem('intima-theme') as Theme | null
     if (stored === 'light' || stored === 'dark') return stored
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  } catch {
+    return 'light'
   }
-  return 'light'
+}
+
+function applyTheme(theme: Theme) {
+  const root = document.documentElement
+  if (theme === 'dark') {
+    root.classList.add('dark')
+  } else {
+    root.classList.remove('dark')
+  }
+  localStorage.setItem('intima-theme', theme)
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(getInitialTheme)
-  const initialized = useRef(false)
+  const [theme, setThemeState] = useState<Theme>('light')
 
   useEffect(() => {
-    if (initialized.current) return
-    initialized.current = true
-    const root = document.documentElement
-    if (theme === 'dark') {
-      root.classList.add('dark')
-    } else {
-      root.classList.remove('dark')
-    }
-    localStorage.setItem('intima-theme', theme)
+    const t = getTheme()
+    setThemeState(t)
+    applyTheme(t)
+  }, [])
+
+  useEffect(() => {
+    applyTheme(theme)
   }, [theme])
 
   const toggleTheme = useCallback(() => {

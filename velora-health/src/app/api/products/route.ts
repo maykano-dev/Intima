@@ -1,6 +1,21 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-admin'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { categories, products as seedProducts, type SeedProduct } from '@/lib/products-data'
+
+const productImages: Record<string, string[]> = {
+  'whisper-bullet-vibrator': ['https://images.unsplash.com/photo-1596704017254-9b121068fb31?w=600&h=600&fit=crop'],
+  'pulse-wand-massager': ['https://images.unsplash.com/photo-1621607512214-68297480165e?w=600&h=600&fit=crop'],
+  'aria-air-pulse-stimulator': ['https://images.unsplash.com/photo-1596704017254-9b121068fb31?w=600&h=600&fit=crop'],
+  'sensual-stroker': ['https://images.unsplash.com/photo-1621607512214-68297480165e?w=600&h=600&fit=crop'],
+  'duo-vibrating-cock-ring': ['https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=600&h=600&fit=crop'],
+  'premium-delay-spray': ['https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&h=600&fit=crop'],
+  'water-based-lubricant-200ml': ['https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&h=600&fit=crop'],
+  'toy-cleaner-spray-100ml': ['https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&h=600&fit=crop'],
+  'essence-arousal-gel': ['https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&h=600&fit=crop'],
+  'starter-butt-plug-kit': ['https://images.unsplash.com/photo-1596704017254-9b121068fb31?w=600&h=600&fit=crop'],
+  'couples-starter-bundle': ['https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=600&h=600&fit=crop'],
+  'herbal-vitality-supplement': ['https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&h=600&fit=crop'],
+}
 
 function mapProduct(p: SeedProduct, index: number) {
   const cat = categories.find((c) => c.id === p.category_id)
@@ -14,7 +29,7 @@ function mapProduct(p: SeedProduct, index: number) {
     material: p.material,
     price_ghs: p.price_ghs,
     compare_price_ghs: p.compare_price_ghs,
-    images: [],
+    images: productImages[p.slug] || [],
     category_id: p.category_id,
     category_name: cat?.name || null,
     in_stock: p.in_stock,
@@ -47,7 +62,7 @@ export async function GET(request: Request) {
     if (isSupabaseConfigured()) {
       try {
         if (slug) {
-          const { data, error } = await supabaseAdmin
+          const { data, error } = await getSupabaseAdmin()
             .from('products')
             .select('*, categories(name)')
             .eq('slug', slug)
@@ -70,7 +85,7 @@ export async function GET(request: Request) {
           return NextResponse.json(null, { status: 404 })
         }
 
-        let query = supabaseAdmin
+        let query = getSupabaseAdmin()
           .from('products')
           .select('*, categories(name)')
           .eq('in_stock', true)

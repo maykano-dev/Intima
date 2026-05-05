@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Script from "next/script"
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google"
 import "./globals.css"
 import { CartProvider } from "@/components/cart/CartProvider"
@@ -58,9 +59,25 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var t = localStorage.getItem('intima-theme');
+                if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                if (t === 'dark') document.documentElement.classList.add('dark');
+              } catch(e) {}
+            `,
+          }}
+        />
+        <Script
+          src="https://js.paystack.co/v1/inline.js"
+          strategy="beforeInteractive"
+        />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <ThemeProvider>

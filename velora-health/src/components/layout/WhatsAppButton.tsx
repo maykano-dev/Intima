@@ -1,6 +1,6 @@
 'use client'
 
-const PHONE_NUMBER = '233XXXXXXXXX'
+const PHONE_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '233XXXXXXXXX'
 
 export default function WhatsAppButton() {
   function handleClick() {

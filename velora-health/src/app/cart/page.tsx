@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useCart } from '@/components/cart/CartProvider'
 import { formatPrice } from '@/lib/utils'
@@ -38,8 +39,20 @@ export default function CartPage() {
         <div className="lg:col-span-2 space-y-4">
           {items.map((item) => (
             <div key={item.id} className="flex gap-4 p-4 rounded-2xl border border-border">
-              <div className="w-20 h-20 rounded-xl bg-secondary flex items-center justify-center flex-shrink-0">
-                <span className="text-2xl opacity-30">&#x2764;</span>
+              <div className="relative w-20 h-20 rounded-xl bg-secondary overflow-hidden flex-shrink-0">
+                {item.image ? (
+                  <Image
+                    src={item.image}
+                    alt={item.name}
+                    fill
+                    className="object-cover"
+                    sizes="80px"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <span className="text-2xl opacity-30">&#x2764;</span>
+                  </div>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <Link

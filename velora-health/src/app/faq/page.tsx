@@ -156,7 +156,7 @@ export default function FAQPage() {
           <h2 className="font-semibold mb-2">Still have questions?</h2>
           <p className="text-sm text-muted mb-4">We&apos;re here to help. Reach out on WhatsApp.</p>
           <a
-            href="https://wa.me/233XXXXXXXXX"
+            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '233XXXXXXXXX'}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
