@@ -9,6 +9,7 @@ import CartDrawer from "@/components/layout/CartDrawer"
 import AgeGate from "@/components/layout/AgeGate"
 import WhatsAppButton from "@/components/layout/WhatsAppButton"
 import CustomCursor from "@/components/layout/CustomCursor"
+import RevealObserver from "@/components/layout/RevealObserver"
 
 export const metadata: Metadata = {
   title: {
@@ -70,6 +71,7 @@ export default function RootLayout({
         <ThemeProvider>
           <CartProvider>
             <CustomCursor />
+            <RevealObserver />
             <AgeGate />
             <Navbar />
             <main className="flex-1">{children}</main>
