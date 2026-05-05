@@ -9,22 +9,7 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import { cn } from '@/lib/utils'
 
-type ShippingMethod = 'express' | 'sea'
-
-const SHIPPING_OPTIONS: Record<ShippingMethod, { label: string; price: number; time: string; desc: string }> = {
-  sea: {
-    label: 'Standard Sea',
-    price: 25,
-    time: '6–8 weeks',
-    desc: 'Budget-friendly option. Best value for money.',
-  },
-  express: {
-    label: 'Express Air',
-    price: 65,
-    time: '12–16 days',
-    desc: 'Fast international shipping with priority handling.',
-  },
-}
+type ShippingMethod = 'sea' | 'air'
 
 interface FormData {
   name: string
@@ -76,7 +61,12 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false)
   const [paymentLoading, setPaymentLoading] = useState(false)
 
-  const shipping = SHIPPING_OPTIONS[shippingMethod]
+  const shippingOptions = {
+    sea: { label: 'Sea Freight', price: 25, time: '6-8 weeks', desc: 'Budget-friendly option. Recommended for budget-conscious buyers.' },
+    air: { label: 'Air Freight', price: 65, time: '10-16 days', desc: 'Fast international shipping with priority handling.' },
+  } as const
+
+  const shipping = shippingOptions[shippingMethod]
   const total = subtotal + shipping.price
 
   function validate(): boolean {
@@ -126,7 +116,7 @@ export default function CheckoutPage() {
           })),
           total,
           shipping_method: shippingMethod,
-          shipping_price: shipping.price,
+          shipping_cost: shipping.price,
         }),
       })
 
@@ -254,7 +244,7 @@ export default function CheckoutPage() {
           <div className="rounded-2xl border border-border p-6">
             <h2 className="text-lg font-semibold mb-4">Shipping Method</h2>
             <div className="grid sm:grid-cols-2 gap-3">
-              {(Object.entries(SHIPPING_OPTIONS) as [ShippingMethod, typeof SHIPPING_OPTIONS[ShippingMethod]][]).map(
+              {(Object.entries(shippingOptions) as [ShippingMethod, typeof shippingOptions[ShippingMethod]][]).map(
                 ([key, option]) => (
                   <button
                     key={key}
@@ -272,7 +262,7 @@ export default function CheckoutPage() {
                         Recommended
                       </div>
                     )}
-                    <div className="text-xl mb-1">{key === 'express' ? '\u2708\ufe0f' : '\u26f5'}</div>
+                    <div className="text-xl mb-1">{key === 'air' ? '\u2708\ufe0f' : '\u26f5'}</div>
                     <div className="font-semibold text-sm">{option.label}</div>
                     <div className="text-xs text-muted mt-0.5">{option.time}</div>
                     <div className="text-xs text-muted mt-1">{option.desc}</div>

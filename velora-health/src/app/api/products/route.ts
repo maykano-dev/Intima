@@ -17,8 +17,25 @@ const productImages: Record<string, string[]> = {
   'herbal-vitality-supplement': ['https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&h=600&fit=crop'],
 }
 
-function mapProduct(p: SeedProduct, index: number) {
+async function getExchangeRate(): Promise<number | null> {
+  if (!isSupabaseConfigured()) return null
+  try {
+    const { data, error } = await getSupabaseAdmin()
+      .from('platform_settings')
+      .select('exchange_rate')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+    if (error || !data?.exchange_rate) return null
+    return data.exchange_rate
+  } catch {
+    return null
+  }
+}
+
+function mapProduct(p: SeedProduct, index: number, exchangeRate?: number | null) {
   const cat = categories.find((c) => c.id === p.category_id)
+  const computedPriceGhs = exchangeRate ? Math.round((p.price_cny / exchangeRate) * 100) / 100 : p.price_ghs
   return {
     id: `prod_${index + 1}`,
     name: p.name,
@@ -27,8 +44,10 @@ function mapProduct(p: SeedProduct, index: number) {
     benefits: p.benefits,
     usage_guide: p.usage_guide,
     material: p.material,
-    price_ghs: p.price_ghs,
+    price_cny: p.price_cny,
+    price_ghs: computedPriceGhs,
     compare_price_ghs: p.compare_price_ghs,
+    availability_status: p.availability_status || (p.in_stock ? 'in_stock' : 'out_of_stock'),
     images: productImages[p.slug] || [],
     category_id: p.category_id,
     category_name: cat?.name || null,
@@ -47,6 +66,7 @@ function isSupabaseConfigured(): boolean {
 }
 
 export async function GET(request: Request) {
+  let exchangeRate: number | null = null
   try {
     const { searchParams } = new URL(request.url)
     const slug = searchParams.get('slug')
@@ -56,6 +76,11 @@ export async function GET(request: Request) {
 
     if (getCategories) {
       return NextResponse.json(categories)
+    }
+
+    // Fetch exchange rate from platform_settings
+    if (isSupabaseConfigured()) {
+      exchangeRate = await getExchangeRate()
     }
 
     // Try Supabase only if configured
@@ -75,12 +100,14 @@ export async function GET(request: Request) {
               ...data,
               category_name: data.categories?.name || null,
               categories: undefined,
+              price_cny: data.price_cny || null,
+              availability_status: data.availability_status || (data.in_stock ? 'in_stock' : 'out_of_stock'),
             })
           }
 
           const seedIndex = seedProducts.findIndex((p) => p.slug === slug)
           if (seedIndex >= 0) {
-            return NextResponse.json(mapProduct(seedProducts[seedIndex], seedIndex))
+            return NextResponse.json(mapProduct(seedProducts[seedIndex], seedIndex, exchangeRate))
           }
           return NextResponse.json(null, { status: 404 })
         }
@@ -108,6 +135,8 @@ export async function GET(request: Request) {
             ...item,
             category_name: (item.categories as { name?: string })?.name || null,
             categories: undefined,
+            price_cny: item.price_cny || null,
+            availability_status: item.availability_status || ((item.in_stock as boolean) ? 'in_stock' : 'out_of_stock'),
           }))
           return NextResponse.json(transformed)
         }
@@ -117,7 +146,7 @@ export async function GET(request: Request) {
     }
 
     // Fallback to seed data
-    let results = seedProducts.map((p, i) => mapProduct(p, i))
+    let results = seedProducts.map((p, i) => mapProduct(p, i, exchangeRate))
 
     if (slug) {
       const found = results.find((p) => p.slug === slug)
@@ -135,7 +164,7 @@ export async function GET(request: Request) {
     return NextResponse.json(results)
   } catch (error) {
     console.error('Products API error:', error)
-    const fallback = seedProducts.map((p, i) => mapProduct(p, i))
+    const fallback = seedProducts.map((p, i) => mapProduct(p, i, exchangeRate))
     return NextResponse.json(fallback)
   }
 }

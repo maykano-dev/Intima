@@ -7,7 +7,6 @@ import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import CartDrawer from "@/components/layout/CartDrawer"
 import AgeGate from "@/components/layout/AgeGate"
-import WhatsAppButton from "@/components/layout/WhatsAppButton"
 import CustomCursor from "@/components/layout/CustomCursor"
 import RevealObserver from "@/components/layout/RevealObserver"
 
@@ -77,7 +76,6 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
             <Footer />
             <CartDrawer />
-            <WhatsAppButton />
           </CartProvider>
         </ThemeProvider>
       </body>

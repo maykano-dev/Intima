@@ -6,12 +6,14 @@ export interface SeedProduct {
   usage_guide: string
   material: string
   price_ghs: number
+  price_cny: number
   compare_price_ghs: number | null
   category_id: string
   in_stock: boolean
   is_featured: boolean
   rating: number
   review_count: number
+  availability_status?: string
 }
 
 export const categories = [
@@ -75,6 +77,7 @@ export const products: SeedProduct[] = [
     usage_guide: 'Apply a small amount of water-based lubricant to the bullet head for enhanced sensation. Press the button to cycle through vibration modes. Clean thoroughly after each use with toy cleaner.',
     material: 'Body-safe silicone over ABS plastic',
     price_ghs: 95,
+    price_cny: 27,
     compare_price_ghs: 130,
     category_id: 'vibrators',
     in_stock: true,
@@ -90,6 +93,7 @@ export const products: SeedProduct[] = [
     usage_guide: 'Start on the lowest setting and gradually increase. Use externally for best results. The flexible head contours to your body naturally. Clean with warm water and toy cleaner after use.',
     material: 'Medical-grade silicone head, ABS plastic body',
     price_ghs: 249,
+    price_cny: 70,
     compare_price_ghs: 320,
     category_id: 'vibrators',
     in_stock: true,
@@ -105,6 +109,7 @@ export const products: SeedProduct[] = [
     usage_guide: 'Place the nozzle over the clitoris. Press power to start and cycle through intensity levels. Use a drop of lubricant around the opening for best seal. Rinse and dry after use.',
     material: 'Body-safe silicone, ABS plastic, electronic components',
     price_ghs: 350,
+    price_cny: 98,
     compare_price_ghs: 450,
     category_id: 'vibrators',
     in_stock: true,
@@ -120,6 +125,7 @@ export const products: SeedProduct[] = [
     usage_guide: 'Apply generous amount of lubricant inside the sleeve. Warm the sleeve in warm water for 2 minutes for a more realistic feel. Clean thoroughly after each use with toy cleaner and pat dry.',
     material: 'TPE (thermoplastic elastomer), ABS plastic casing',
     price_ghs: 110,
+    price_cny: 31,
     compare_price_ghs: 150,
     category_id: 'male-pleasure',
     in_stock: true,
@@ -135,6 +141,7 @@ export const products: SeedProduct[] = [
     usage_guide: 'Slide the ring over the penis before erection. Position the vibrator bulb against the clitoris during intercourse. Use plenty of water-based lubricant. Remove vibrator for cleaning.',
     material: 'Body-safe silicone, electronic vibrator',
     price_ghs: 120,
+    price_cny: 34,
     compare_price_ghs: 160,
     category_id: 'male-pleasure',
     in_stock: true,
@@ -150,6 +157,7 @@ export const products: SeedProduct[] = [
     usage_guide: 'Spray 2-3 pumps onto the most sensitive areas 5-10 minutes before intimacy. Allow to absorb. Wash off after 10 minutes if desensitization is too strong. Start with fewer pumps to gauge sensitivity.',
     material: 'Water-based with lidocaine (5%), aloe vera, chamomile extract',
     price_ghs: 75,
+    price_cny: 21,
     compare_price_ghs: 100,
     category_id: 'male-pleasure',
     in_stock: true,
@@ -165,6 +173,7 @@ export const products: SeedProduct[] = [
     usage_guide: 'Apply a small pump to the area of use. Reapply as needed. Add a drop of water to reactivate if it dries during play. Clean with warm water and mild soap.',
     material: 'Water-based glycerin-free formula, pH balanced',
     price_ghs: 65,
+    price_cny: 18,
     compare_price_ghs: 85,
     category_id: 'lubricants',
     in_stock: true,
@@ -180,6 +189,7 @@ export const products: SeedProduct[] = [
     usage_guide: 'Spray 2-3 pumps onto toy surface after use. Wipe clean with a soft cloth or rinse with water. Allow to air dry before storing.',
     material: 'Water, benzalkonium chloride (0.13%), non-toxic surfactants',
     price_ghs: 55,
+    price_cny: 15,
     compare_price_ghs: 70,
     category_id: 'wellness',
     in_stock: true,
@@ -195,6 +205,7 @@ export const products: SeedProduct[] = [
     usage_guide: 'Apply a small amount to the clitoral area. Massage gently. The warming sensation activates with body heat and movement. Use additional lubricant if needed.',
     material: 'Water-based with natural warming agents, aloe vera, vitamin E',
     price_ghs: 80,
+    price_cny: 22,
     compare_price_ghs: 110,
     category_id: 'lubricants',
     in_stock: true,
@@ -210,6 +221,7 @@ export const products: SeedProduct[] = [
     usage_guide: 'Start with the smallest size. Apply generous lubricant. Insert slowly and breathe deeply. Only move to larger size when completely comfortable. Always use more lubricant than you think you need.',
     material: 'Body-safe silicone, ABS plastic base',
     price_ghs: 140,
+    price_cny: 39,
     compare_price_ghs: 180,
     category_id: 'anal',
     in_stock: true,
@@ -225,6 +237,7 @@ export const products: SeedProduct[] = [
     usage_guide: 'Start with the conversation cards to set the mood. Use the lubricant for comfortable intimacy. Add the vibrating ring when both partners are ready.',
     material: 'Mixed materials — see individual products',
     price_ghs: 220,
+    price_cny: 62,
     compare_price_ghs: 275,
     category_id: 'couples',
     in_stock: true,
@@ -240,6 +253,7 @@ export const products: SeedProduct[] = [
     usage_guide: 'Take 2 capsules daily with a meal. Do not exceed recommended dosage. Consult your healthcare provider if you have any medical conditions or take prescription medication.',
     material: 'Horny goat weed extract, ginseng, maca root, tribulus terrestris — vegetarian capsules',
     price_ghs: 150,
+    price_cny: 42,
     compare_price_ghs: 200,
     category_id: 'wellness',
     in_stock: true,

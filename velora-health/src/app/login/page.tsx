@@ -24,7 +24,18 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       })
       if (res.ok) {
-        router.push('/admin')
+        // Check profile role to redirect appropriately
+        const profileRes = await fetch('/api/admin/profile')
+        if (profileRes.ok) {
+          const profileData = await profileRes.json()
+          if (profileData.profile?.role === 'admin') {
+            router.push('/admin')
+          } else {
+            router.push('/dashboard')
+          }
+        } else {
+          router.push('/dashboard')
+        }
       } else {
         const data = await res.json()
         setError(data.error || 'Login failed')
