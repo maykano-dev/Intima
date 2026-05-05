@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import { Geist, Geist_Mono, Playfair_Display } from "next/font/google"
 import "./globals.css"
 import { CartProvider } from "@/components/cart/CartProvider"
 import { ThemeProvider } from "@/components/layout/ThemeProvider"
@@ -8,6 +8,7 @@ import Footer from "@/components/layout/Footer"
 import CartDrawer from "@/components/layout/CartDrawer"
 import AgeGate from "@/components/layout/AgeGate"
 import WhatsAppButton from "@/components/layout/WhatsAppButton"
+import CustomCursor from "@/components/layout/CustomCursor"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,6 +17,11 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+})
+
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
   subsets: ["latin"],
 })
 
@@ -51,7 +57,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} h-full antialiased`}
     >
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -59,6 +65,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <ThemeProvider>
           <CartProvider>
+            <CustomCursor />
             <AgeGate />
             <Navbar />
             <main className="flex-1">{children}</main>

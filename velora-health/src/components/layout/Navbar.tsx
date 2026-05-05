@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useCart } from '@/components/cart/CartProvider'
@@ -20,6 +20,17 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const { itemCount, openDrawer } = useCart()
   const pathname = usePathname()
+
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [mobileOpen])
+
+  function closeMobile() { setMobileOpen(false) }
 
   return (
     <header className="sticky top-0 z-30 bg-card/95 backdrop-blur-md border-b border-border">
@@ -83,17 +94,48 @@ export default function Navbar() {
             </button>
           </div>
         </div>
+      </nav>
 
-        {mobileOpen && (
-          <div className="md:hidden border-t border-border py-4 animate-fade-in">
-            <div className="flex flex-col gap-2">
+      {/* Overlay */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden" onClick={closeMobile} />
+      )}
+
+      {/* Slide-out sidebar */}
+      <div
+        className={cn(
+          'fixed top-0 right-0 z-50 h-full w-72 bg-card shadow-2xl md:hidden transform transition-transform duration-300 ease-in-out',
+          mobileOpen ? 'translate-x-0' : 'translate-x-full'
+        )}
+      >
+        <div className="flex flex-col h-full">
+          <div className="flex items-center justify-between p-5 border-b border-border">
+            <Link href="/" onClick={closeMobile} className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+                <span className="text-white text-sm font-bold">I</span>
+              </div>
+              <span className="text-lg font-bold tracking-tight">Intima</span>
+            </Link>
+            <button
+              onClick={closeMobile}
+              className="p-2 rounded-lg hover:bg-secondary transition-colors"
+              aria-label="Close menu"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-5">
+            <div className="flex flex-col gap-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  onClick={() => setMobileOpen(false)}
+                  onClick={closeMobile}
                   className={cn(
-                    'px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                    'px-4 py-3 rounded-xl text-sm font-medium transition-colors',
                     pathname === link.href
                       ? 'bg-primary/10 text-primary'
                       : 'text-muted hover:bg-secondary hover:text-foreground'
@@ -104,8 +146,18 @@ export default function Navbar() {
               ))}
             </div>
           </div>
-        )}
-      </nav>
+
+          <div className="border-t border-border p-5">
+            <Link
+              href="/shop"
+              onClick={closeMobile}
+              className="flex items-center justify-center w-full rounded-lg bg-primary text-white px-5 py-3 text-sm font-medium hover:bg-primary-dark transition-colors"
+            >
+              Shop Now
+            </Link>
+          </div>
+        </div>
+      </div>
     </header>
   )
 }

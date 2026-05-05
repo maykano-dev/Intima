@@ -65,9 +65,14 @@
   #age-gate.hidden { opacity: 0; visibility: hidden; }
   .age-gate-inner { text-align: center; padding: 3rem; max-width: 480px; }
   .age-gate-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 3.5rem; font-weight: 300; letter-spacing: 0.15em;
-    color: var(--cream); margin-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+    opacity: 0;
+    animation: fadeIn 1s 0.2s forwards;
+  }
+  .age-gate-logo-img {
+    height: 80px;
+    width: auto;
+    filter: invert(1) brightness(2);
   }
   .age-gate-tagline {
     font-family: 'Playfair Display', serif; font-style: italic;
@@ -77,16 +82,27 @@
     font-size: 0.85rem; color: var(--primary-lt); line-height: 1.7; margin-bottom: 2rem;
     letter-spacing: 0.03em;
   }
+  .age-btn-yes {
+    background: var(--primary); color: var(--white);
+  }
+  .age-btn-yes:hover { background: var(--primary-lt); transform: translateY(-2px); }
+  .age-gate-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    align-items: center;
+    margin-top: 2.5rem;
+  }
   .age-btn {
-    display: inline-block; padding: 0.85rem 2.5rem;
+    display: block;
+    width: 100%;
+    max-width: 280px;
+    padding: 1rem 2rem;
     font-family: 'Inter', sans-serif; font-size: 0.8rem;
     letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;
     border: none; transition: all 0.3s;
+    text-align: center;
   }
-  .age-btn-yes {
-    background: var(--primary); color: var(--white); margin-right: 1rem;
-  }
-  .age-btn-yes:hover { background: var(--primary-lt); }
   .age-btn-no {
     background: transparent; color: var(--primary-lt);
     border: 1px solid var(--forest-lt);
@@ -106,9 +122,14 @@
     box-shadow: 0 1px 0 rgba(26,26,26,0.08);
   }
   .nav-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.8rem; font-weight: 300; letter-spacing: 0.2em;
-    color: var(--forest); text-decoration: none;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+  }
+  .nav-logo-img {
+    height: 32px;
+    width: auto;
+    mix-blend-mode: multiply;
   }
   .nav-links { display: flex; gap: 2.5rem; list-style: none; }
   .nav-links a {
@@ -139,6 +160,17 @@
     font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase;
     color: var(--primary); margin-bottom: 1.5rem;
     opacity: 0; animation: fadeUp 0.8s 0.3s forwards;
+  }
+  .hero-right-logo {
+    position: absolute;
+    width: 220px;
+    height: auto;
+    z-index: 5;
+    opacity: 0;
+    animation: fadeIn 1.5s 0.8s forwards;
+    /* This combination removes the white background on dark forest by inverting and screening */
+    filter: invert(100%) brightness(200%);
+    mix-blend-mode: screen;
   }
   .hero-title {
     font-family: 'Playfair Display', serif;
@@ -524,20 +556,26 @@
 <!-- Age Gate -->
 <div id="age-gate">
   <div class="age-gate-inner">
-    <div class="age-gate-logo">Intima</div>
+    <div class="age-gate-logo">
+      <img src="assets/intimalogo.png" alt="Intima" class="age-gate-logo-img">
+    </div>
     <div class="age-gate-tagline">Wellness. Privacy. You.</div>
     <p class="age-gate-text">
       This website contains content intended for adults only.<br>
       By entering, you confirm that you are 18 years of age or older.
     </p>
-    <button class="age-btn age-btn-yes" onclick="enterSite()">I am 18+ — Enter</button>
-    <button class="age-btn age-btn-no" onclick="window.location='https://google.com'">I am under 18 — Exit</button>
+    <div class="age-gate-actions">
+      <button class="age-btn age-btn-yes" onclick="enterSite()">I am 18+ — Enter</button>
+      <button class="age-btn age-btn-no" onclick="window.location='https://google.com'">I am under 18 — Exit</button>
+    </div>
   </div>
 </div>
 
 <!-- Navigation -->
 <nav id="navbar">
-  <a href="#" class="nav-logo">Intima</a>
+  <a href="#" class="nav-logo">
+    <img src="assets/intimalogo.png" alt="Intima" class="nav-logo-img">
+  </a>
   <ul class="nav-links">
     <li><a href="#categories">Shop</a></li>
     <li><a href="#why">About</a></li>
@@ -582,6 +620,7 @@
 
   <div class="hero-right">
     <div class="hero-right-inner">
+      <img src="assets/intimalogo.png" alt="Intima" class="hero-right-logo">
       <div class="hero-visual"></div>
       <div class="floating-tag tag1">
         <svg class="tag-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A8BBA0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
