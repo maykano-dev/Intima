@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { sanitizeInput } from '@/lib/utils'
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
 
 const mockReviews = [
   { id: 'r1', product_id: 'prod_1', customer_name: 'Sarah M.', rating: 5, content: 'Perfect for beginners! So discreet and quiet. Exactly what I needed.', approved: true, created_at: '2025-03-15' },
@@ -74,6 +75,15 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request)
+    const { allowed } = checkRateLimit(`review:${ip}`, 5, 60000)
+    if (!allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests. Try again later.' },
+        { status: 429 }
+      )
+    }
+
     const body = await request.json()
     const { product_id, name, rating, content } = body
 

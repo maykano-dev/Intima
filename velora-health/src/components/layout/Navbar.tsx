@@ -39,13 +39,11 @@ export default function Navbar() {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center">
-            <div className="overflow-hidden rounded-md flex items-center">
+            <div className="overflow-hidden rounded-lg flex items-center">
               <Image
                 src={intimaLogo}
                 alt="Intima"
-                width={140}
-                height={45}
-                className="object-contain"
+                className="w-[140px] h-auto object-contain"
                 priority
               />
             </div>
@@ -117,13 +115,11 @@ export default function Navbar() {
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between p-5 border-b border-border">
             <Link href="/" onClick={closeMobile} className="flex items-center">
-              <div className="overflow-hidden rounded-md flex items-center">
+              <div className="overflow-hidden rounded-lg flex items-center">
                 <Image
                   src={intimaLogo}
                   alt="Intima"
-                  width={140}
-                  height={45}
-                  className="object-contain"
+                  className="w-[140px] h-auto object-contain"
                 />
               </div>
             </Link>

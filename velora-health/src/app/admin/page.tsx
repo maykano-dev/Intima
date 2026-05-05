@@ -1,7 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { formatPrice, cn } from '@/lib/utils'
+import Button from '@/components/ui/Button'
 
 interface Order {
   id: string
@@ -33,14 +36,34 @@ const nextStatus: Record<string, string> = {
 }
 
 export default function AdminPage() {
+  const router = useRouter()
+  const [authChecked, setAuthChecked] = useState(false)
+  const [authenticated, setAuthenticated] = useState(false)
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [updating, setUpdating] = useState<string | null>(null)
 
   useEffect(() => {
-    loadOrders()
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/auth/session')
+        if (res.ok) {
+          const data = await res.json()
+          setAuthenticated(!!data.user)
+        }
+      } catch {
+        setAuthenticated(false)
+      } finally {
+        setAuthChecked(true)
+      }
+    }
+    checkAuth()
   }, [])
+
+  useEffect(() => {
+    if (authenticated) loadOrders()
+  }, [authenticated])
 
   async function loadOrders() {
     setLoading(true)
@@ -82,6 +105,20 @@ export default function AdminPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+      {!authChecked ? (
+        <div className="flex items-center justify-center py-16">
+          <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+        </div>
+      ) : !authenticated ? (
+        <div className="max-w-md mx-auto text-center py-16">
+          <h1 className="text-2xl font-bold mb-2">Admin Access</h1>
+          <p className="text-muted mb-6">Sign in to manage your store.</p>
+          <Link href="/login">
+            <Button variant="primary">Sign In</Button>
+          </Link>
+        </div>
+      ) : (
+        <>
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
@@ -158,6 +195,8 @@ export default function AdminPage() {
             </tbody>
           </table>
         </div>
+      )}
+        </>
       )}
     </div>
   )
