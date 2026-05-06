@@ -20,6 +20,19 @@ export interface Product {
   rating: number
   review_count: number
   created_at: string
+  product_link?: string
+  variants?: ProductVariant[]
+}
+
+export interface ProductVariant {
+  id?: string
+  product_id?: string
+  name: string
+  type: 'size' | 'color' | 'material' | 'style'
+  price_ghs?: number
+  in_stock: boolean
+  image?: string
+  sort_order: number
 }
 
 export interface Category {

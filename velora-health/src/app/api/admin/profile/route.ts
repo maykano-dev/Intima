@@ -1,13 +1,23 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { getSupabase, isSupabaseConfigured } from '@/lib/supabase'
+import { isSupabaseConfigured } from '@/lib/supabase'
 import { mockGetSession } from '@/lib/mock-auth'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     if (isSupabaseConfigured()) {
-      const supabase = getSupabase()!
-      if (!supabase) return NextResponse.json({ user: null }, { status: 401 })
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            getAll() { return request.cookies.getAll() },
+            setAll() {},
+          },
+        }
+      )
+
       const { data: { session } } = await supabase.auth.getSession()
       if (!session?.user) return NextResponse.json({ user: null }, { status: 401 })
 
@@ -28,7 +38,7 @@ export async function GET() {
 
     return NextResponse.json({
       user: session.user,
-      profile: { role: 'admin', full_name: session.user.user_metadata?.full_name || 'Dev User' },
+      profile: { role: 'user', full_name: session.user.user_metadata?.full_name || 'Dev User' },
     })
   } catch (error) {
     console.error('Admin profile error:', error)

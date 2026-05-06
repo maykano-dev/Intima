@@ -68,6 +68,20 @@ export const categories = [
     description: 'A wide range of dildos in various materials and styles.',
     image: '/images/category-dildos.jpg',
   },
+  {
+    id: 'herbal',
+    name: 'Herbal Products',
+    slug: 'herbal',
+    description: 'Natural herbal supplements for vitality and wellness.',
+    image: '/images/category-herbal.jpg',
+  },
+  {
+    id: 'adult-games',
+    name: 'Adult Games',
+    slug: 'adult-games',
+    description: 'Fun and provocative games for couples and parties.',
+    image: '/images/category-adult-games.jpg',
+  },
 ]
 
 export const products: SeedProduct[] = [

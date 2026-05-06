@@ -122,7 +122,7 @@ export default function AdminCategories() {
           <div key={cat.id} className="flex items-center justify-between p-4 rounded-xl border border-border hover:bg-secondary/50 transition-colors">
             <div>
               <p className="font-medium text-sm">{cat.name}</p>
-              <p className="text-xs text-muted">{cat.slug} {cat.description && `— ${cat.description}`}</p>
+              <p className="text-xs text-muted">{cat.slug} {cat.description && `- ${cat.description}`}</p>
             </div>
             <div className="flex gap-2">
               <button onClick={() => handleEdit(cat)} className="text-xs text-primary hover:underline">Edit</button>

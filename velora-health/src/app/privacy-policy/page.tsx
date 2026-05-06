@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
-  description: 'Intima privacy policy — how we collect, use, and protect your data.',
+  description: 'Intima privacy policy: how we collect, use, and protect your data.',
 }
 
 export default function PrivacyPolicyPage() {
@@ -16,7 +16,7 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-xl font-semibold text-foreground">1. Our Commitment to Privacy</h2>
             <p>
-              Intima is built on trust. Your privacy is not just a policy — it is our core
+              Intima is built on trust. Your privacy is not just a policy, it is our core
               value. We collect the minimum data necessary to process your order and deliver it.
               We never share your personal information with third parties for marketing purposes.
             </p>
@@ -39,7 +39,7 @@ export default function PrivacyPolicyPage() {
             <h2 className="text-xl font-semibold text-foreground">3. How We Protect Your Data</h2>
             <ul>
               <li>All site traffic is encrypted via HTTPS SSL</li>
-              <li>Payment processing is handled entirely by Paystack — we never see your card or MoMo PIN</li>
+              <li>Payment processing is handled entirely by Paystack. We never see your card or MoMo PIN</li>
               <li>Your data is stored securely in access-controlled databases</li>
               <li>We retain order data only as long as necessary for legal and accounting purposes</li>
             </ul>
@@ -61,8 +61,8 @@ export default function PrivacyPolicyPage() {
               marketing purposes. We may share data with:
             </p>
             <ul>
-              <li>Paystack (payment processing — required for transaction completion)</li>
-              <li>Delivery partners (name, phone, address — required for delivery)</li>
+              <li>Paystack (payment processing, required for transaction completion)</li>
+              <li>Delivery partners (name, phone, address, required for delivery)</li>
               <li>Legal authorities (only if required by law)</li>
             </ul>
           </section>

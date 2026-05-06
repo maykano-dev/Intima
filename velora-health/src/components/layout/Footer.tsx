@@ -26,6 +26,7 @@ const footerLinks = {
     links: [
       { href: '/about', label: 'About Us' },
       { href: '/blog', label: 'Blog' },
+      { href: '/admin', label: 'Admin' },
     ],
   },
 }

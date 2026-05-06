@@ -113,7 +113,7 @@ export default function AdminCustomers() {
 
             <div className="text-sm space-y-2">
               <p><span className="text-muted">Email:</span> {selectedCustomer.email}</p>
-              <p><span className="text-muted">Phone:</span> {selectedCustomer.phone || '—'}</p>
+              <p><span className="text-muted">Phone:</span> {selectedCustomer.phone || '-'}</p>
               <p><span className="text-muted">Role:</span> {selectedCustomer.role}</p>
               <p><span className="text-muted">Joined:</span> {new Date(selectedCustomer.created_at).toLocaleDateString()}</p>
               <p><span className="text-muted">Orders:</span> {selectedCustomer.total_orders ?? 0}</p>
@@ -197,9 +197,9 @@ export default function AdminCustomers() {
                   className="border-b border-border hover:bg-secondary/50 transition-colors cursor-pointer"
                   onClick={() => { setSelectedCustomer(c); setBanReason(''); setAdminNote('') }}
                 >
-                  <td className="py-3 px-2 font-medium">{c.full_name || '—'}</td>
+                  <td className="py-3 px-2 font-medium">{c.full_name || '-'}</td>
                   <td className="py-3 px-2 text-muted">{c.email}</td>
-                  <td className="py-3 px-2 text-muted">{c.phone || '—'}</td>
+                  <td className="py-3 px-2 text-muted">{c.phone || '-'}</td>
                   <td className="py-3 px-2">{c.total_orders ?? 0}</td>
                   <td className="py-3 px-2">
                     {c.is_banned ? (

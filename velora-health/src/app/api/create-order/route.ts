@@ -1,10 +1,18 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { getSupabase } from '@/lib/supabase'
+import { createClient as createServerClient } from '@/lib/supabase-server'
+import { isSupabaseConfigured } from '@/lib/supabase'
 import { generateOrderId, sanitizeInput } from '@/lib/utils'
 
 async function getUserId(): Promise<string | null> {
   try {
+    if (isSupabaseConfigured()) {
+      const supabase = await createServerClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      return session?.user?.id || null
+    }
+    // Fallback for mock auth in dev
+    const { getSupabase } = await import('@/lib/supabase')
     const supabase = getSupabase()!
     const { data } = await supabase.auth.getSession()
     return data.session?.user?.id || null

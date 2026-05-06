@@ -11,10 +11,29 @@ export async function GET() {
 
     if (error) throw error
 
+    const productIds = (data || []).map((item: Record<string, unknown>) => item.id).filter(Boolean)
+
+    let variantsMap: Record<string, unknown[]> = {}
+    if (productIds.length > 0) {
+      const { data: variants } = await getSupabaseAdmin()!
+        .from('product_variants')
+        .select('*')
+        .in('product_id', productIds)
+        .order('sort_order', { ascending: true })
+      if (variants) {
+        for (const v of variants) {
+          const pid = v.product_id as string
+          if (!variantsMap[pid]) variantsMap[pid] = []
+          variantsMap[pid].push(v)
+        }
+      }
+    }
+
     const transformed = (data || []).map((item: Record<string, unknown>) => ({
       ...item,
       category_name: (item.categories as { name?: string })?.name || null,
       categories: undefined,
+      variants: variantsMap[item.id as string] || [],
     }))
 
     return NextResponse.json(transformed)
@@ -27,7 +46,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { name, slug, description, benefits, usage_guide, material, price_ghs, compare_price_ghs, images, category_id, in_stock, is_featured } = body
+    const { name, slug, description, benefits, usage_guide, material, price_ghs, compare_price_ghs, images, category_id, in_stock, is_featured, product_link, variants } = body
 
     if (!name || !price_ghs || !category_id) {
       return NextResponse.json({ error: 'Name, price, and category are required' }, { status: 400 })
@@ -47,6 +66,7 @@ export async function POST(request: Request) {
         price_ghs,
         compare_price_ghs: compare_price_ghs || null,
         images: images || [],
+        product_link: product_link || null,
         category_id,
         in_stock: in_stock ?? true,
         is_featured: is_featured ?? false,
@@ -55,6 +75,20 @@ export async function POST(request: Request) {
       .single()
 
     if (error) throw error
+
+    if (variants && Array.isArray(variants) && variants.length > 0) {
+      const variantInserts = variants.map((v: Record<string, unknown>) => ({
+        product_id: data.id,
+        name: v.name,
+        type: v.type || 'size',
+        price_ghs: v.price_ghs || null,
+        in_stock: v.in_stock ?? true,
+        image: v.image || null,
+        sort_order: 0,
+      }))
+      await getSupabaseAdmin()!.from('product_variants').insert(variantInserts)
+    }
+
     return NextResponse.json(data, { status: 201 })
   } catch (error) {
     console.error('Admin product create error:', error)
@@ -65,7 +99,7 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const body = await request.json()
-    const { id, name, slug, description, benefits, usage_guide, material, price_ghs, compare_price_ghs, images, category_id, in_stock, is_featured } = body
+    const { id, name, slug, description, benefits, usage_guide, material, price_ghs, compare_price_ghs, images, category_id, in_stock, is_featured, product_link, variants } = body
 
     if (!id) {
       return NextResponse.json({ error: 'Product ID required' }, { status: 400 })
@@ -81,9 +115,26 @@ export async function PATCH(request: Request) {
     if (price_ghs !== undefined) updates.price_ghs = price_ghs
     if (compare_price_ghs !== undefined) updates.compare_price_ghs = compare_price_ghs
     if (images !== undefined) updates.images = images
+    if (product_link !== undefined) updates.product_link = product_link
     if (category_id !== undefined) updates.category_id = category_id
     if (in_stock !== undefined) updates.in_stock = in_stock
     if (is_featured !== undefined) updates.is_featured = is_featured
+
+    if (variants && Array.isArray(variants)) {
+      await getSupabaseAdmin()!.from('product_variants').delete().eq('product_id', id)
+      if (variants.length > 0) {
+        const variantInserts = variants.map((v: Record<string, unknown>) => ({
+          product_id: id,
+          name: v.name,
+          type: v.type || 'size',
+          price_ghs: v.price_ghs || null,
+          in_stock: v.in_stock ?? true,
+          image: v.image || null,
+          sort_order: 0,
+        }))
+        await getSupabaseAdmin()!.from('product_variants').insert(variantInserts)
+      }
+    }
 
     const { data, error } = await getSupabaseAdmin()!
       .from('products')

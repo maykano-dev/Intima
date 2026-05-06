@@ -185,14 +185,14 @@ export default function ProductPage() {
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                In Stock Locally — Arrives in {product.lead_time || '1-3 Days'}
+                In Stock in Ghana, Delivered in {product.lead_time || '1-3 Days'}
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary font-medium">
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
-                Standard Fulfillment — Arrives in {product.lead_time || '7-14 Days'}
+                Imported Item, Delivered in {product.lead_time || '7-14 Days'}
               </span>
             )}
             <span className="inline-flex items-center gap-1 text-muted">

@@ -121,7 +121,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname()
   const [authChecked, setAuthChecked] = useState(false)
   const [authenticated, setAuthenticated] = useState(false)
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [profile, setProfile] = useState<{ email?: string } | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
@@ -138,7 +138,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           const profileRes = await fetch('/api/admin/profile')
           if (profileRes.ok) {
             const profileData = await profileRes.json()
-            setIsAdmin(profileData.profile?.role === 'admin')
+            if (profileData.profile?.role !== 'admin') {
+              setAuthChecked(true)
+              return
+            }
+            setProfile(profileData.profile || profileData.user)
           }
         }
       } catch {
@@ -151,72 +155,148 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [])
 
   useEffect(() => {
-    if (authChecked && (!authenticated || !isAdmin)) {
-      router.push('/login')
+    if (authChecked && !authenticated) {
+      router.push('/login?redirect=/admin')
     }
-  }, [authChecked, authenticated, isAdmin, router])
+  }, [authChecked, authenticated, router])
+
+  useEffect(() => {
+    setSidebarOpen(false)
+  }, [pathname])
 
   if (!authChecked) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-[#BFA075] border-t-transparent animate-spin" />
       </div>
     )
   }
 
-  if (!authenticated || !isAdmin) return null
+  if (!authenticated) return null
 
   return (
-    <div className="min-h-[60vh]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-        <div className="flex gap-8 flex-col lg:flex-row">
-          <aside className="lg:w-64 flex-shrink-0">
-            <div className="lg:sticky lg:top-24 space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold">Admin</h2>
-                <button
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="lg:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                </button>
-              </div>
+    <div className="min-h-screen bg-[#050A08] flex">
+      {/* Mobile Header */}
+      <header className="lg:hidden fixed top-0 left-0 w-full z-[90] flex items-center justify-between px-6 py-4 bg-[#0A1410] border-b border-[rgba(242,232,223,0.05)]">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 -ml-2 text-[#F2E8DF] hover:text-[#BFA075] transition-colors"
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <span className="font-serif text-lg tracking-[0.2em] text-[#BFA075]">INTIMA</span>
+        </div>
+      </header>
 
-              <nav className={cn(
-                'flex-col gap-1',
-                sidebarOpen ? 'flex' : 'hidden lg:flex'
-              )}>
-                {adminLinks.map((link) => {
-                  const isActive = link.href === '/admin'
-                    ? pathname === '/admin'
-                    : pathname.startsWith(link.href)
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setSidebarOpen(false)}
-                      className={cn(
-                        'flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors',
-                        isActive
-                          ? 'bg-primary/10 text-primary'
-                          : 'text-muted hover:bg-secondary hover:text-foreground'
-                      )}
-                    >
-                      {link.icon}
-                      {link.label}
-                    </Link>
-                  )
-                })}
-              </nav>
+      {/* Sidebar Backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Fixed Sidebar */}
+      <aside className={cn(
+        "fixed inset-y-0 left-0 w-[280px] bg-[#0A1410] border-r border-[rgba(242,232,223,0.05)] z-[101] transform transition-transform duration-300 ease-in-out lg:translate-x-0",
+        sidebarOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
+        <div className="h-full flex flex-col pt-8 lg:pt-10">
+          {/* Logo Branding */}
+          <div className="px-10 mb-12 hidden lg:block">
+            <Link href="/admin" className="font-serif text-2xl tracking-[0.3em] text-[#BFA075] no-underline">
+              INTIMA
+            </Link>
+          </div>
+
+          {/* Profile Section */}
+          <div className="px-6 mb-8">
+            <div className="flex items-center gap-4 p-4 rounded-2xl bg-[rgba(191,160,117,0.03)] border border-[rgba(191,160,117,0.08)]">
+              <div className="w-11 h-11 rounded-full bg-[#BFA075] flex items-center justify-center text-[#0A1410] font-bold text-base uppercase flex-shrink-0">
+                A
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-sm font-bold text-[#F2E8DF] truncate">Admin</h2>
+                <p className="text-[10px] text-[#8A7F76] truncate tracking-wider uppercase">{profile?.email || 'Administrator'}</p>
+              </div>
             </div>
-          </aside>
-          <div className="flex-1 min-w-0">
+          </div>
+
+          {/* Navigation Links */}
+          <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto">
+            {adminLinks.map((link) => {
+              const isActive = link.href === '/admin'
+                ? pathname === '/admin'
+                : pathname.startsWith(link.href)
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setSidebarOpen(false)}
+                  className={cn(
+                    'flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium transition-all duration-300',
+                    isActive
+                      ? 'bg-[#BFA075] text-[#0A1410] shadow-[0_4px_12px_rgba(191,160,117,0.2)]'
+                      : 'text-[#8A7F76] hover:text-[#F2E8DF] hover:bg-[rgba(242,232,223,0.03)]'
+                  )}
+                >
+                  <span className={isActive ? 'text-[#0A1410]' : 'text-inherit'}>
+                    {link.icon}
+                  </span>
+                  {link.label}
+                </Link>
+              )
+            })}
+
+            {/* Shop Button */}
+            <div className="pt-4 px-2">
+              <Link
+                href="/shop"
+                className="flex items-center justify-center gap-2 w-full py-3.5 bg-[rgba(191,160,117,0.1)] text-[#BFA075] border border-[rgba(191,160,117,0.2)] rounded-xl text-xs font-bold uppercase tracking-[0.1em] hover:bg-[#BFA075] hover:text-[#0A1410] transition-all no-underline"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                Browse Shop
+              </Link>
+            </div>
+          </nav>
+
+          {/* Logout Area */}
+          <div className="p-4 border-t border-[rgba(242,232,223,0.05)] space-y-1">
+            <Link
+              href="/"
+              className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium text-[#8A7F76] hover:text-[#F2E8DF] hover:bg-[rgba(242,232,223,0.03)] transition-all no-underline"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              Back to Site
+            </Link>
+            <button
+              onClick={() => router.push('/api/auth/logout')}
+              className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium text-[#EF4444] hover:bg-red-500/10 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="flex-1 lg:ml-[280px] pt-20 lg:pt-0 min-h-screen">
+        <div className="p-6 lg:p-12">
+          <div className="max-w-6xl">
             {children}
           </div>
         </div>
-      </div>
+      </main>
     </div>
   )
 }

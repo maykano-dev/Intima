@@ -1,62 +1,83 @@
-import { Resend } from 'resend'
+import { getAdminSupabase } from './supabase'
 
-const resendApiKey = process.env.RESEND_API_KEY
-const resend = resendApiKey ? new Resend(resendApiKey) : null
-const fromEmail = 'Intima <notifications@intima.com>'
-const adminEmail = 'support@intima.com'
+export async function sendEmail({ to, subject, html }: { to: string, subject: string, html: string }) {
+  const supabase = getAdminSupabase()
+  if (!supabase) return { error: 'Supabase admin client not configured' }
+
+  try {
+    const { data, error } = await supabase.functions.invoke('send-email', {
+      body: { to, subject, html },
+    })
+
+    if (error) throw error
+    return { data }
+  } catch (error: any) {
+    console.error('Edge Function Email Error:', error)
+    return { error: error.message }
+  }
+}
+
+export const emailTemplates = {
+  confirmation: (name: string, url: string) => `
+    <div style="background-color: #0A1410; color: #F2E8DF; font-family: sans-serif; padding: 40px; text-align: center; border-radius: 16px;">
+      <h2 style="color: #BFA075; font-size: 24px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px;">Welcome to Intima</h2>
+      <p style="font-size: 16px; margin-bottom: 30px; color: #8A7F76;">Hello ${name}, follow the link below to confirm your account and start your wellness journey.</p>
+      <a href="${url}" style="background-color: #BFA075; color: #0A1410; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Confirm Account</a>
+      <p style="font-size: 12px; margin-top: 40px; color: #5A7263;">If you didn't create an account, you can safely ignore this email.</p>
+    </div>
+  `,
+  notification: (name: string, email: string, subject: string, message: string) => `
+    <div style="background-color: #0A1410; color: #F2E8DF; font-family: sans-serif; padding: 30px; border-radius: 16px; border: 1px solid #BFA075;">
+      <h3 style="color: #BFA075; border-bottom: 1px solid #BFA075; padding-bottom: 10px;">New Contact Message</h3>
+      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Subject:</strong> ${subject}</p>
+      <p><strong>Message:</strong></p>
+      <p style="background: rgba(242,232,223,0.05); padding: 15px; border-radius: 8px;">${message}</p>
+    </div>
+  `,
+  welcome: (email: string) => `
+    <div style="background-color: #0A1410; color: #F2E8DF; font-family: sans-serif; padding: 40px; text-align: center; border-radius: 16px;">
+      <h2 style="color: #BFA075; font-size: 24px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px;">The Inner Circle</h2>
+      <p style="font-size: 16px; margin-bottom: 30px; color: #8A7F76;">Welcome to the Intima inner circle. You are now subscribed to receive our private wellness updates and collection drops.</p>
+      <p style="font-size: 12px; margin-top: 40px; color: #5A7263;">You can unsubscribe at any time.</p>
+    </div>
+  `,
+  recovery: (url: string) => `
+    <div style="background-color: #0A1410; color: #F2E8DF; font-family: sans-serif; padding: 40px; text-align: center; border-radius: 16px;">
+      <h2 style="color: #BFA075; font-size: 24px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px;">Password Recovery</h2>
+      <p style="font-size: 16px; margin-bottom: 30px; color: #8A7F76;">We received a request to reset your password. Click the button below to choose a new one.</p>
+      <a href="${url}" style="background-color: #BFA075; color: #0A1410; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Reset Password</a>
+      <p style="font-size: 12px; margin-top: 40px; color: #5A7263;">If you didn't request this, you can safely ignore this email.</p>
+    </div>
+  `
+}
 
 export async function sendContactNotification(name: string, email: string, subject: string, message: string) {
-  if (!resend) return
-  try {
-    await resend.emails.send({
-      from: fromEmail,
-      to: adminEmail,
-      subject: `[Intima Contact] ${subject}`,
-      text: `From: ${name} (${email})\n\nSubject: ${subject}\n\nMessage:\n${message}`,
-    })
-  } catch (error) {
-    console.error('Failed to send contact email:', error)
-  }
+  return sendEmail({
+    to: process.env.ADMIN_EMAIL || 'admin@intima.love',
+    subject: `New Contact Form: ${subject}`,
+    html: emailTemplates.notification(name, email, subject, message)
+  })
 }
 
 export async function sendContactConfirmation(name: string, email: string) {
-  if (!resend) return
-  try {
-    await resend.emails.send({
-      from: fromEmail,
-      to: email,
-      subject: 'We received your message — Intima',
-      text: `Hi ${name},\n\nThank you for reaching out to Intima. We've received your message and will get back to you within 24 hours.\n\nIf you need immediate assistance, please email us at support@intima.com.\n\nBest regards,\nThe Intima Team`,
-    })
-  } catch (error) {
-    console.error('Failed to send contact confirmation:', error)
-  }
+  return sendEmail({
+    to: email,
+    subject: 'We received your message - Intima Wellness',
+    html: `
+      <div style="background-color: #0A1410; color: #F2E8DF; font-family: sans-serif; padding: 40px; text-align: center; border-radius: 16px;">
+        <h2 style="color: #BFA075; font-size: 20px;">Hello ${name},</h2>
+        <p style="color: #8A7F76;">We've received your message and our team will get back to you shortly. Thank you for reaching out.</p>
+      </div>
+    `
+  })
 }
 
 export async function sendSubscribeWelcome(email: string) {
-  if (!resend) return
-  try {
-    await resend.emails.send({
-      from: fromEmail,
-      to: email,
-      subject: 'Welcome to the Intima newsletter',
-      text: `Hi there,\n\nThank you for subscribing to the Intima newsletter. You'll now receive exclusive offers, sexual health education, and new arrival updates.\n\nWe respect your privacy — we'll never share your email.\n\nBest regards,\nThe Intima Team`,
-    })
-  } catch (error) {
-    console.error('Failed to send welcome email:', error)
-  }
-}
-
-export async function sendOrderConfirmation(email: string, orderId: string) {
-  if (!resend) return
-  try {
-    await resend.emails.send({
-      from: fromEmail,
-      to: email,
-      subject: `Order ${orderId} Confirmed — Intima`,
-      text: `Thank you for your order!\n\nYour order ID is: ${orderId}\n\nYou can track your order at: https://intima.com/track\n\nWe'll send you updates as your order progresses.\n\nIf you have any questions, email us at support@intima.com.\n\nBest regards,\nThe Intima Team`,
-    })
-  } catch (error) {
-    console.error('Failed to send order confirmation:', error)
-  }
+  return sendEmail({
+    to: email,
+    subject: 'Welcome to the Intima Circle',
+    html: emailTemplates.welcome(email)
+  })
 }

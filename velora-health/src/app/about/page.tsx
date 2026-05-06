@@ -4,7 +4,7 @@ import Button from '@/components/ui/Button'
 
 export const metadata: Metadata = {
   title: 'About Us',
-  description: 'Learn about Intima — Ghana\'s most discreet sexual wellness platform.',
+  description: 'Learn about Intima, Ghana\'s most discreet sexual wellness platform.',
 }
 
 export default function AboutPage() {
@@ -27,16 +27,16 @@ export default function AboutPage() {
           </p>
 
           <p>
-            We founded Intima to fill this gap — combining international-quality products with local
+            We founded Intima to fill this gap, combining international-quality products with local
             speed, local payment methods, and deep cultural sensitivity.
           </p>
         </div>
 
         <div className="grid sm:grid-cols-3 gap-6 my-12">
           {[
-            { value: '100%', label: 'Discreet' },
-            { value: 'Same-Day', label: 'Delivery in Accra' },
-            { value: '24/7', label: 'WhatsApp Support' },
+            { value: '100%', label: 'Discreet Packaging' },
+            { value: 'Global', label: 'Sourced Worldwide' },
+            { value: 'Reliable', label: 'Email Support' },
           ].map((stat) => (
             <div key={stat.label} className="text-center p-6 rounded-2xl bg-secondary">
               <div className="text-2xl font-bold text-primary">{stat.value}</div>

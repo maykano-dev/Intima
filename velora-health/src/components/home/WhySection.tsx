@@ -19,7 +19,7 @@ export default function WhySection() {
         <p className="text-[0.92rem] leading-[1.9] mb-10 text-white/70">
           We built Intima because we know how uncomfortable it can be to walk into a store and ask for
           what you actually need. You deserve access to quality wellness products without the stares,
-          the questions, or the embarrassment. That&apos;s why everything we do — from checkout to delivery —
+          the questions, or the embarrassment. That&apos;s why everything we do from checkout to delivery
           is designed around your privacy first.
         </p>
         <Link href="/shop" className="inline-block px-10 py-4 bg-primary text-background text-[0.8rem] tracking-[0.12em] uppercase no-underline transition-all duration-300 hover:opacity-90 hover:-translate-y-0.5">

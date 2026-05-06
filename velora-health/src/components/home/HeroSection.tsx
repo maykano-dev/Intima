@@ -30,7 +30,7 @@ export default function HeroSection() {
         </div>
         <div className="flex gap-10 mt-16 animate-[fadeUp_0.8s_1.1s_forwards]">
           {[
-            { label: 'Shipping', val: 'Sea & Air' },
+            { label: 'Sourcing', val: 'Global & Local' },
             { label: 'Packaging', val: '100% Discreet' },
             { label: 'Payment', val: 'MoMo & Card' },
           ].map((item) => (
@@ -55,7 +55,7 @@ export default function HeroSection() {
           </div>
           <div className="floating-tag tag2">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            Worldwide Shipping
+            Imported & Local
           </div>
           <div className="floating-tag tag3">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>

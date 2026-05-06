@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useMemo, useEffect } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import { useCart } from '@/components/cart/CartProvider'
-import { formatPrice, sanitizeInput, isValidEmail, isValidGhanaPhone } from '@/lib/utils'
+import { formatPrice, sanitizeInput, isValidGhanaPhone } from '@/lib/utils'
 import { getPaystackPublicKey } from '@/lib/paystack'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
@@ -11,9 +11,14 @@ import { cn } from '@/lib/utils'
 
 type ShippingMethod = 'sea' | 'air'
 
+interface SavedAddress {
+  id: string
+  address: string
+  city: string
+  is_default: boolean
+}
+
 interface FormData {
-  name: string
-  email: string
   phone: string
   address: string
   city: string
@@ -46,11 +51,13 @@ declare global {
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { items, subtotal, clearCart } = useCart()
+  const pathname = usePathname()
+  const { items, subtotal, clearCart, openDrawer } = useCart()
   const [shippingMethod, setShippingMethod] = useState<ShippingMethod>('sea')
-  const [form, setForm] = useState<FormData>({
-    name: '',
-    email: '',
+  const [profile, setProfile] = useState<{ full_name?: string; email?: string } | null>(null)
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([])
+  const [isEditingAddress, setIsEditingAddress] = useState(false)
+  const [form, setForm] = useState<Omit<FormData, 'name' | 'email'>>({
     phone: '',
     address: '',
     city: 'Accra',
@@ -60,6 +67,56 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitting, setSubmitting] = useState(false)
   const [paymentLoading, setPaymentLoading] = useState(false)
+  const [authenticated, setAuthenticated] = useState(false)
+  const [authChecked, setAuthChecked] = useState(false)
+
+  useEffect(() => {
+    async function checkAuth() {
+      const res = await fetch('/api/auth/session')
+      if (res.ok) {
+        const data = await res.json()
+        if (!data.user) {
+          router.push(`/login?redirect=${encodeURIComponent(pathname)}`)
+        } else {
+          setAuthenticated(true)
+          // Get profile
+          const profileRes = await fetch('/api/user/settings')
+          if (profileRes.ok) {
+            const profileData = await profileRes.json()
+            setProfile(profileData)
+            setForm(f => ({ ...f, phone: profileData.phone || '' }))
+          }
+          // Get addresses
+          const addrRes = await fetch('/api/user/addresses')
+          if (addrRes.ok) {
+            const addrs = await addrRes.json()
+            setSavedAddresses(addrs)
+            const def = addrs.find((a: SavedAddress) => a.is_default) || addrs[0]
+            if (def) {
+              setForm(f => ({ ...f, address: def.address, city: def.city }))
+              setIsEditingAddress(false)
+            } else {
+              setIsEditingAddress(true)
+            }
+          } else {
+            setIsEditingAddress(true)
+          }
+        }
+      }
+      setAuthChecked(true)
+    }
+    checkAuth()
+  }, [router, pathname])
+
+  if (!authChecked) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      </div>
+    )
+  }
+
+  if (!authenticated) return null
 
   const groups = useMemo(() => {
     const local = items.filter((i) => i.delivery_profile === 'local')
@@ -70,18 +127,16 @@ export default function CheckoutPage() {
   const isMixed = groups.local.length > 0 && groups.standard.length > 0
 
   const shippingOptions = {
-    sea: { label: 'Sea Freight', price: 25, time: '6-8 weeks', desc: 'Budget-friendly option. Recommended for budget-conscious buyers.' },
-    air: { label: 'Air Freight', price: 65, time: '10-16 days', desc: 'Fast international shipping with priority handling.' },
+    sea: { label: 'Sea Freight', price: 0, time: '6-8 weeks', desc: 'Shipping costs will be calculated and billed after your order is processed.' },
+    air: { label: 'Air Freight', price: 0, time: '10-16 days', desc: 'Shipping costs will be calculated and billed after your order is processed.' },
   } as const
 
   const shipping = shippingOptions[shippingMethod]
-  const total = subtotal + shipping.price
+  const serviceFee = subtotal * 0.1
+  const total = subtotal + serviceFee + shipping.price
 
   function validate(): boolean {
     const errs: FormErrors = {}
-    if (!form.name.trim()) errs.name = 'Name is required'
-    if (!form.email.trim()) errs.email = 'Email is required'
-    else if (!isValidEmail(form.email)) errs.email = 'Invalid email address'
     if (!form.phone.trim()) errs.phone = 'Phone is required'
     else if (!isValidGhanaPhone(form.phone)) errs.phone = 'Enter a valid Ghana phone number (e.g., 024XXXXXXX)'
     if (!form.address.trim()) errs.address = 'Delivery address is required'
@@ -91,11 +146,11 @@ export default function CheckoutPage() {
   }
 
   async function handlePayWithMoMo() {
-    if (!validate()) return
+    if (!validate() || !profile) return
 
     const paystackPublicKey = getPaystackPublicKey()
     if (!paystackPublicKey || paystackPublicKey.startsWith('pk_test_')) {
-      setErrors({ email: 'Payment not configured.' })
+      setErrors({ phone: 'Payment not configured.' })
       return
     }
 
@@ -108,8 +163,8 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           customer: {
-            name: sanitizeInput(form.name),
-            email: sanitizeInput(form.email),
+            name: profile.full_name || 'Customer',
+            email: profile.email || '',
             phone: sanitizeInput(form.phone),
             address: sanitizeInput(form.address),
             city: sanitizeInput(form.city),
@@ -134,14 +189,14 @@ export default function CheckoutPage() {
       const reference = `INT-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
       const handler = window.PaystackPop.setup({
         key: paystackPublicKey,
-        email: form.email,
+        email: profile.email || '',
         amount: Math.round(total * 100),
         currency: 'GHS',
         ref: reference,
         metadata: {
           order_id: order.id,
           custom_fields: [
-            { display_name: 'Customer Name', variable_name: 'customer_name', value: form.name },
+            { display_name: 'Customer Name', variable_name: 'customer_name', value: profile.full_name || 'Customer' },
             { display_name: 'Phone', variable_name: 'phone', value: form.phone },
           ],
         },
@@ -189,63 +244,94 @@ export default function CheckoutPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-      <h1 className="text-2xl lg:text-3xl font-bold mb-8">Checkout</h1>
+      <div className="flex items-center gap-4 mb-8">
+        <button onClick={openDrawer} className="text-sm font-medium text-primary hover:underline flex items-center gap-2">
+          &larr; Back to Cart
+        </button>
+        <h1 className="text-2xl lg:text-3xl font-bold">Checkout</h1>
+      </div>
 
       <div className="grid lg:grid-cols-5 gap-8">
         <div className="lg:col-span-3 space-y-6">
           <div className="rounded-2xl border border-border p-6">
-            <h2 className="text-lg font-semibold mb-4">Delivery Details</h2>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="sm:col-span-2">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Delivery Details</h2>
+              {savedAddresses.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setIsEditingAddress(!isEditingAddress)}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  {isEditingAddress ? 'Cancel' : 'Change Address'}
+                </button>
+              )}
+            </div>
+
+            {!isEditingAddress && savedAddresses.length > 0 ? (
+              <div className="p-4 rounded-xl border border-border bg-card">
+                <p className="font-medium text-sm">{profile?.full_name}</p>
+                <p className="text-sm text-muted mt-1">{form.address}</p>
+                <p className="text-sm text-muted">{form.city}</p>
+                <p className="text-sm text-muted mt-2">{form.phone}</p>
+              </div>
+            ) : (
+              <div className="grid sm:grid-cols-2 gap-4">
                 <Input
-                  label="Full Name"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  error={errors.name}
-                  placeholder="John Doe"
+                  label="Phone (Ghana)"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  error={errors.phone}
+                  placeholder="024XXXXXXX"
                 />
-              </div>
-              <Input
-                label="Email"
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                error={errors.email}
-                placeholder="john@example.com"
-              />
-              <Input
-                label="Phone (Ghana)"
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                error={errors.phone}
-                placeholder="024XXXXXXX"
-              />
-              <div className="sm:col-span-2">
                 <Input
-                  label="Delivery Address"
-                  value={form.address}
-                  onChange={(e) => setForm({ ...form, address: e.target.value })}
-                  error={errors.address}
-                  placeholder="Street address, landmark, digital address"
+                  label="City"
+                  value={form.city}
+                  onChange={(e) => setForm({ ...form, city: e.target.value })}
+                  error={errors.city}
+                  placeholder="Accra"
                 />
+                <div className="sm:col-span-2">
+                  <Input
+                    label="Delivery Address"
+                    value={form.address}
+                    onChange={(e) => setForm({ ...form, address: e.target.value })}
+                    error={errors.address}
+                    placeholder="Street address, landmark, digital address"
+                  />
+                </div>
+                {savedAddresses.length > 0 && (
+                  <div className="sm:col-span-2 space-y-2">
+                    <p className="text-xs font-medium text-muted uppercase tracking-wider">Select Saved Address</p>
+                    <div className="grid grid-cols-1 gap-2">
+                      {savedAddresses.map((addr) => (
+                        <button
+                          key={addr.id}
+                          type="button"
+                          onClick={() => {
+                            setForm({ ...form, address: addr.address, city: addr.city })
+                            setIsEditingAddress(false)
+                          }}
+                          className="text-left p-3 rounded-lg border border-border hover:border-primary transition-colors text-sm"
+                        >
+                          <p className="font-medium">{addr.address}</p>
+                          <p className="text-xs text-muted">{addr.city}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-              <Input
-                label="City"
-                value={form.city}
-                onChange={(e) => setForm({ ...form, city: e.target.value })}
-                error={errors.city}
-                placeholder="Accra"
+            )}
+
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-foreground mb-1.5">Order Notes (optional)</label>
+              <textarea
+                value={form.notes}
+                onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                rows={2}
+                className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none bg-card"
+                placeholder="Delivery instructions, gate code, etc."
               />
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5">Order Notes (optional)</label>
-                <textarea
-                  value={form.notes}
-                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                  rows={2}
-                  className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none bg-card"
-                  placeholder="Delivery instructions, gate code, etc."
-                />
-              </div>
             </div>
           </div>
 
@@ -275,7 +361,7 @@ export default function CheckoutPage() {
                     <div className="text-xs text-muted mt-0.5">{option.time}</div>
                     <div className="text-xs text-muted mt-1">{option.desc}</div>
                     <div className="font-bold text-sm mt-2">
-                      {formatPrice(option.price)}
+                      {option.price === 0 ? 'Billed Later' : formatPrice(option.price)}
                     </div>
                   </button>
                 )
@@ -314,7 +400,7 @@ export default function CheckoutPage() {
             <div className="space-y-4 mb-4">
               {groups.local.length > 0 && (
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider text-success font-semibold mb-2">Ready to Ship — In Stock Locally</p>
+                  <p className="text-[10px] uppercase tracking-wider text-success font-semibold mb-2">In Stock in Ghana</p>
                   {groups.local.map((item) => (
                     <div key={item.id} className="flex justify-between text-sm py-1">
                       <span className="text-muted line-clamp-1 flex-1">{item.name} x{item.quantity}</span>
@@ -326,28 +412,25 @@ export default function CheckoutPage() {
               )}
               {groups.standard.length > 0 && (
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider text-primary font-semibold mb-2">Standard Fulfillment</p>
+                  <p className="text-[10px] uppercase tracking-wider text-primary font-semibold mb-2">Imported Item</p>
                   {groups.standard.map((item) => (
                     <div key={item.id} className="flex justify-between text-sm py-1">
                       <span className="text-muted line-clamp-1 flex-1">{item.name} x{item.quantity}</span>
                       <span className="font-medium ml-2">{formatPrice(item.price_ghs * item.quantity)}</span>
                     </div>
                   ))}
-                  <p className="text-[10px] text-primary/70 mt-1">Arrives in {groups.standard[0]?.lead_time || '7-14 Days'}</p>
+                  <p className="text-[10px] text-primary/70 mt-1">Estimated Arrival: {shipping.time}</p>
                 </div>
               )}
             </div>
             <div className="border-t border-border pt-3 space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted">Subtotal</span>
+                <span className="text-muted">Items Total</span>
                 <span className="font-medium">{formatPrice(subtotal)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted">
-                  Shipping ({shipping.label})
-                  <span className="block text-xs text-muted">{shipping.time}</span>
-                </span>
-                <span className="font-medium">{formatPrice(shipping.price)}</span>
+                <span className="text-muted">Service Fee</span>
+                <span className="font-medium">{formatPrice(serviceFee)}</span>
               </div>
             </div>
             <div className="border-t border-border pt-3 flex justify-between text-base">

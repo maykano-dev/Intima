@@ -51,7 +51,7 @@ export default function ReadyToShipSection() {
           <div>
             <p className="section-eyebrow">Fast Delivery</p>
             <h2 className="font-serif text-[clamp(2rem,3vw,3rem)] font-light text-accent leading-[1.15]">
-              Ready to Ship<br />
+              In Stock in Ghana<br />
               <em className="italic text-primary">Available Now</em>
             </h2>
           </div>

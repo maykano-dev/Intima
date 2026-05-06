@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Terms of Service',
-  description: 'Intima terms of service — conditions for using our platform.',
+  description: 'Intima terms of service: conditions for using our platform.',
 }
 
 export default function TermsPage() {

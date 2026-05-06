@@ -3,21 +3,31 @@ import Button from '@/components/ui/Button'
 
 export default function NotFound() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-      <div className="max-w-md mx-auto">
-        <h1 className="text-6xl font-bold text-primary mb-4">404</h1>
-        <h2 className="text-2xl font-bold mb-2">Page not found</h2>
-        <p className="text-muted mb-6">
-          The page you&apos;re looking for doesn&apos;t exist or has been moved.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+    <div className="min-h-[80vh] flex items-center justify-center px-4">
+      <div className="max-w-md w-full text-center space-y-8">
+        <div className="relative mx-auto w-32 h-32 flex items-center justify-center">
+          <div className="absolute inset-0 bg-primary/10 rounded-full animate-pulse" />
+          <span className="text-6xl font-bold text-primary">404</span>
+        </div>
+
+        <div className="space-y-3">
+          <h1 className="text-3xl font-bold tracking-tight">Page Not Found</h1>
+          <p className="text-muted text-lg">
+            The page you are looking for doesn&apos;t exist or has been moved to a more discreet location.
+          </p>
+        </div>
+
+        <div className="pt-4">
           <Link href="/">
-            <Button variant="primary">Back to Home</Button>
-          </Link>
-          <Link href="/shop">
-            <Button variant="outline">Browse Shop</Button>
+            <Button variant="primary" size="lg" fullWidth>
+              Return Home
+            </Button>
           </Link>
         </div>
+
+        <p className="text-xs text-muted">
+          Absolute Privacy. Discreet Fulfillment. Intima Wellness.
+        </p>
       </div>
     </div>
   )

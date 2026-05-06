@@ -1,78 +1,91 @@
-import type { Metadata } from "next"
-import Script from "next/script"
-import "./globals.css"
-import { CartProvider } from "@/components/cart/CartProvider"
-import { ThemeProvider } from "@/components/layout/ThemeProvider"
-import Navbar from "@/components/layout/Navbar"
-import Footer from "@/components/layout/Footer"
-import CartDrawer from "@/components/layout/CartDrawer"
+import type { Metadata, Viewport } from 'next'
+import './globals.css'
+import './landing.css'
+import { CartProvider } from '@/components/cart/CartProvider'
+import Navbar from '@/components/layout/Navbar'
+import Footer from '@/components/layout/Footer'
+import BackToTop from '@/components/layout/BackToTop'
+import { ThemeProvider } from '@/components/layout/ThemeProvider'
+import RevealObserver from '@/components/layout/RevealObserver'
+import ConditionalLayout from '@/components/layout/ConditionalLayout'
+import CartDrawer from '@/components/layout/CartDrawer'
+import { Toaster } from 'sonner'
 
-import RevealObserver from "@/components/layout/RevealObserver"
+
+
+export const viewport: Viewport = {
+  themeColor: '#0a0a0a',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+}
 
 export const metadata: Metadata = {
   title: {
-    default: "Intima — Discreet Sexual Wellness, Ghana",
-    template: "%s | Intima",
+    default: 'Intima Wellness | Discreet Delivery & Absolute Privacy Ghana',
+    template: '%s | Intima Wellness'
   },
-  description:
-    "Ghana's most discreet sexual wellness platform. Quality-verified products, anonymous checkout, and fast doorstep delivery. Your privacy is our promise.",
+  description: 'Ghana\'s premium discreet wellness shop. Fast, anonymous doorstep delivery of health, lifestyle, and intimacy essentials. Absolute privacy guaranteed with plain packaging and secure MoMo payments.',
   keywords: [
-    "sexual wellness Ghana",
-    "discreet delivery Accra",
-    "sexual health products Ghana",
-    "intimacy products",
-    "MTN MoMo payment",
+    'wellness Ghana', 'discreet delivery Accra', 'privacy-focused shopping', 'lifestyle essentials Ghana', 
+    'anonymous delivery', 'plain packaging shop', 'health products Accra', 'wellness products Kumasi', 
+    'secure intimacy shopping', 'discreet fulfillment', 'MoMo payment shop', 'anonymous wellness', 
+    'Intima wellness', 'Ghana health and wellness', 'fast delivery Accra', 'doorstep delivery Ghana'
   ],
-  robots: { index: true, follow: true },
+  authors: [{ name: 'Intima' }],
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   openGraph: {
-    title: "Intima — Discreet Sexual Wellness",
-    description:
-      "Ghana's most discreet sexual wellness platform. Quality-verified products, anonymous checkout.",
-    type: "website",
-    locale: "en_GH",
+    type: 'website',
+    locale: 'en_GH',
+    url: '/',
+    siteName: 'Intima Wellness',
+    title: 'Intima Wellness | Absolute Privacy',
+    description: 'Premium wellness and lifestyle essentials. Discreetly delivered.',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Intima Wellness',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Intima Wellness | Absolute Privacy',
+    description: 'Premium wellness essentials. Discreetly delivered.',
+    images: ['/og-image.jpg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
-    <html
-      lang="en"
-      className="h-full antialiased dark"
-      suppressHydrationWarning
-    >
+    <html lang="en" suppressHydrationWarning className="dark" data-scroll-behavior="smooth">
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                document.documentElement.classList.add('dark');
-                var t = localStorage.getItem('intima-theme');
-                if (t === 'light') document.documentElement.classList.remove('dark');
-              } catch(e) {}
-            `,
-          }}
-        />
-        <Script
-          src="https://js.paystack.co/v1/inline.js"
-          strategy="beforeInteractive"
-        />
+        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
       </head>
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body className="font-sans antialiased bg-background text-foreground overflow-x-hidden selection:bg-primary/30 min-h-full flex flex-col">
         <ThemeProvider>
           <CartProvider>
             <RevealObserver />
-            <Navbar />
-            <main className="flex-1 pt-28">{children}</main>
-            <Footer />
+            <ConditionalLayout>
+              {children}
+            </ConditionalLayout>
             <CartDrawer />
+            <Toaster position="bottom-right" theme="dark" richColors />
+            <BackToTop />
+
+
           </CartProvider>
         </ThemeProvider>
       </body>

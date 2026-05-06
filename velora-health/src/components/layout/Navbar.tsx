@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCart } from '@/components/cart/CartProvider'
 import { cn } from '@/lib/utils'
-import ThemeToggle from '@/components/layout/ThemeToggle'
 
 const navLinks = [
   { href: '/shop', label: 'Shop' },
@@ -23,7 +22,10 @@ export default function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
 
+  // Check auth via cookie instead of API call
   useEffect(() => {
+    const hasSession = document.cookie.includes('sb-')
+    if (!hasSession) return
     fetch('/api/auth/session')
       .then((r) => r.json())
       .then((data) => setUser(data.user))
@@ -60,10 +62,8 @@ export default function Navbar() {
   return (
     <>
       <nav className={cn(
-        'fixed top-0 left-0 w-full z-50 flex items-center justify-between px-[5%] transition-all duration-700',
-        scrolled
-          ? 'py-[1.2rem] bg-[rgba(10,20,16,0.8)] backdrop-blur-[20px] border-b border-[rgba(242,232,223,0.1)]'
-          : 'py-[2rem]'
+        'fixed top-0 left-0 w-full z-50 flex items-center justify-between px-[5%] bg-[rgba(10,20,16,0.8)] backdrop-blur-[20px] border-b border-[rgba(242,232,223,0.1)]',
+        scrolled ? 'py-[1.2rem]' : 'py-[2rem]'
       )}>
         <Link href="/" className="font-serif text-[2rem] tracking-[0.1em] text-[#BFA075] no-underline">
           INTIMA
@@ -75,7 +75,7 @@ export default function Navbar() {
               <Link
                 href={link.href}
                 className={cn(
-                  'text-[0.72rem] tracking-[0.2em] uppercase no-underline transition-all duration-600',
+                  'text-[0.72rem] tracking-[0.2em] uppercase no-underline',
                   pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href))
                     ? 'text-[#BFA075]'
                     : 'text-[#5A7263] hover:text-[#BFA075]'
@@ -88,8 +88,6 @@ export default function Navbar() {
         </ul>
 
         <div className="flex items-center gap-4">
-          <ThemeToggle />
-
           {user ? (
             <div className="relative">
               <button
@@ -135,7 +133,7 @@ export default function Navbar() {
               <Link href="/login" className="hidden sm:inline-block text-[0.7rem] tracking-[0.1em] uppercase text-[#F2E8DF] hover:text-[#BFA075] transition-colors no-underline px-2">
                 Sign In
               </Link>
-              <Link href="/register" className="hidden sm:inline-block text-[0.7rem] tracking-[0.15em] uppercase font-medium px-5 py-2.5 bg-[#BFA075] text-[#0A1410] hover:bg-[#F2E8DF] hover:-translate-y-[2px] transition-all duration-600 no-underline">
+              <Link href="/register" className="hidden sm:inline-block text-[0.7rem] tracking-[0.15em] uppercase font-medium px-5 py-2.5 bg-[#BFA075] text-[#0A1410] hover:bg-[#F2E8DF] hover:-translate-y-[2px] no-underline">
                 Create Account
               </Link>
             </>

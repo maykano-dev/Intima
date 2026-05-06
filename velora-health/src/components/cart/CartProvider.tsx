@@ -1,6 +1,8 @@
 'use client'
 
 import { createContext, useContext, useReducer, useEffect, useCallback, type ReactNode } from 'react'
+import { toast } from 'sonner'
+
 import type { CartItem } from '@/types'
 
 interface CartState {
@@ -102,8 +104,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addItem = useCallback((item: Omit<CartItem, 'id' | 'quantity'>) => {
     const id = `${item.product_id}-${Date.now()}`
     dispatch({ type: 'ADD_ITEM', payload: { ...item, id, quantity: 1 } })
-    dispatch({ type: 'SET_DRAWER', payload: true })
+    toast.success(`${item.name} added to cart`)
   }, [])
+
 
   const removeItem = useCallback((id: string) => {
     dispatch({ type: 'REMOVE_ITEM', payload: id })

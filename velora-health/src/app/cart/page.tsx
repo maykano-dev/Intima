@@ -61,7 +61,7 @@ export default function CartPage() {
                 </Link>
                 <p className="text-sm text-muted mt-0.5">{formatPrice(item.price_ghs)}</p>
                 <p className="text-xs text-muted mt-0.5">
-                  {item.delivery_profile === 'local' ? 'Arrives in ' : 'Arrives in '}{item.lead_time || (item.delivery_profile === 'local' ? '1-3 Days' : '7-14 Days')}
+                  {item.delivery_profile === 'local' ? 'In Stock in Ghana, ' : 'Imported, '}{item.lead_time || (item.delivery_profile === 'local' ? 'Delivered in 1-3 Days' : 'Delivered in 7-14 Days')}
                 </p>
                 <div className="flex items-center gap-3 mt-3">
                   <div className="flex items-center border border-border rounded-lg">
@@ -97,8 +97,8 @@ export default function CartPage() {
 
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          {renderItemGroup(groups.local, 'Ready to Ship', 'In Stock Locally', 'bg-success/10 text-success')}
-          {renderItemGroup(groups.standard, 'Standard Fulfillment', 'Discreet Delivery', 'bg-primary/10 text-primary')}
+          {renderItemGroup(groups.local, 'In Stock in Ghana', 'Delivered in 1-3 Days', 'bg-success/10 text-success')}
+          {renderItemGroup(groups.standard, 'Imported Item', 'Delivered in 7-14 Days', 'bg-primary/10 text-primary')}
         </div>
 
         <div className="lg:col-span-1">

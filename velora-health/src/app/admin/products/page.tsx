@@ -33,6 +33,9 @@ export default function AdminProducts() {
     material: '',
     price_ghs: '',
     compare_price_ghs: '',
+    product_link: '',
+    images: [''] as string[],
+    variants: [] as { name: string; type: string; price_ghs: string; in_stock: boolean; image: string }[],
     category_id: 'vibrators',
     in_stock: true,
     is_featured: false,
@@ -52,7 +55,7 @@ export default function AdminProducts() {
   useEffect(() => { loadProducts() }, [])
 
   function resetForm() {
-    setForm({ name: '', slug: '', description: '', benefits: '', usage_guide: '', material: '', price_ghs: '', compare_price_ghs: '', category_id: 'vibrators', in_stock: true, is_featured: false })
+    setForm({ name: '', slug: '', description: '', benefits: '', usage_guide: '', material: '', price_ghs: '', compare_price_ghs: '', product_link: '', images: [''], variants: [], category_id: 'vibrators', in_stock: true, is_featured: false })
     setShowForm(false)
   }
 
@@ -68,6 +71,11 @@ export default function AdminProducts() {
           ...form,
           price_ghs: parseFloat(form.price_ghs),
           compare_price_ghs: form.compare_price_ghs ? parseFloat(form.compare_price_ghs) : null,
+          images: form.images.filter(Boolean),
+          variants: form.variants.map(v => ({
+            ...v,
+            price_ghs: v.price_ghs ? parseFloat(v.price_ghs) : null,
+          })),
         }),
       })
       if (res.ok) {
@@ -153,7 +161,132 @@ export default function AdminProducts() {
             <Input label="Price (GHS)" type="number" step="0.01" value={form.price_ghs} onChange={(e) => setForm({ ...form, price_ghs: e.target.value })} required />
             <Input label="Compare Price (GHS)" type="number" step="0.01" value={form.compare_price_ghs} onChange={(e) => setForm({ ...form, compare_price_ghs: e.target.value })} />
             <Input label="Material" value={form.material} onChange={(e) => setForm({ ...form, material: e.target.value })} />
-            <select
+            <Input label="Product Link (URL)" type="url" value={form.product_link} onChange={(e) => setForm({ ...form, product_link: e.target.value })} placeholder="https://example.com/product" />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Images (URLs)</label>
+            {form.images.map((img, i) => (
+              <div key={i} className="flex gap-2">
+                <input
+                  type="url"
+                  value={img}
+                  onChange={(e) => {
+                    const next = [...form.images]
+                    next[i] = e.target.value
+                    setForm({ ...form, images: next })
+                  }}
+                  placeholder="https://example.com/image.jpg"
+                  className="flex-1 px-3 py-2.5 rounded-xl border border-border bg-transparent text-sm"
+                />
+                {form.images.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, images: form.images.filter((_, j) => j !== i) })}
+                    className="px-3 py-2.5 text-sm text-danger hover:bg-danger/10 rounded-xl transition-colors"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => setForm({ ...form, images: [...form.images, ''] })}
+              className="text-sm text-primary hover:underline"
+            >
+              + Add Image
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            <label className="text-sm font-medium">Variants (colors, sizes, etc.)</label>
+            {form.variants.map((v, i) => (
+              <div key={i} className="p-4 rounded-xl border border-border space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Variant {i + 1}</span>
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, variants: form.variants.filter((_, j) => j !== i) })}
+                    className="text-xs text-danger hover:underline"
+                  >
+                    Remove
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <input
+                    placeholder="Name (e.g. Small, Red)"
+                    value={v.name}
+                    onChange={(e) => {
+                      const next = [...form.variants]
+                      next[i] = { ...next[i], name: e.target.value }
+                      setForm({ ...form, variants: next })
+                    }}
+                    className="px-3 py-2 rounded-xl border border-border bg-transparent text-sm"
+                  />
+                  <select
+                    value={v.type}
+                    onChange={(e) => {
+                      const next = [...form.variants]
+                      next[i] = { ...next[i], type: e.target.value }
+                      setForm({ ...form, variants: next })
+                    }}
+                    className="px-3 py-2.5 rounded-xl border border-border bg-transparent text-sm"
+                  >
+                    <option value="size">Size</option>
+                    <option value="color">Color</option>
+                    <option value="material">Material</option>
+                    <option value="style">Style</option>
+                  </select>
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="Price (GHS)"
+                    value={v.price_ghs}
+                    onChange={(e) => {
+                      const next = [...form.variants]
+                      next[i] = { ...next[i], price_ghs: e.target.value }
+                      setForm({ ...form, variants: next })
+                    }}
+                    className="px-3 py-2 rounded-xl border border-border bg-transparent text-sm"
+                  />
+                  <input
+                    placeholder="Image URL"
+                    value={v.image}
+                    onChange={(e) => {
+                      const next = [...form.variants]
+                      next[i] = { ...next[i], image: e.target.value }
+                      setForm({ ...form, variants: next })
+                    }}
+                    className="px-3 py-2 rounded-xl border border-border bg-transparent text-sm"
+                  />
+                </div>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={v.in_stock}
+                    onChange={(e) => {
+                      const next = [...form.variants]
+                      next[i] = { ...next[i], in_stock: e.target.checked }
+                      setForm({ ...form, variants: next })
+                    }}
+                    className="w-4 h-4 rounded border-border text-primary"
+                  />
+                  <span className="text-sm">In Stock</span>
+                </label>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => setForm({ ...form, variants: [...form.variants, { name: '', type: 'size', price_ghs: '', in_stock: true, image: '' }] })}
+              className="text-sm text-primary hover:underline"
+            >
+              + Add Variant
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <select
               value={form.category_id}
               onChange={(e) => setForm({ ...form, category_id: e.target.value })}
               className="px-3 py-2.5 rounded-xl border border-border bg-transparent text-sm"
@@ -165,6 +298,8 @@ export default function AdminProducts() {
               <option value="anal">Anal</option>
               <option value="wellness">Wellness</option>
               <option value="dildos">Dildos</option>
+              <option value="herbal">Herbal Products</option>
+              <option value="adult-games">Adult Games</option>
             </select>
           </div>
           <textarea
@@ -185,6 +320,7 @@ export default function AdminProducts() {
             onChange={(e) => setForm({ ...form, usage_guide: e.target.value })}
             className="w-full px-3 py-2.5 rounded-xl border border-border bg-transparent text-sm min-h-[80px]"
           />
+
           <div className="flex gap-6">
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={form.in_stock} onChange={(e) => setForm({ ...form, in_stock: e.target.checked })} className="w-4 h-4 rounded border-border text-primary" />

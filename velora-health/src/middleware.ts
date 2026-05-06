@@ -53,7 +53,10 @@ export async function middleware(request: NextRequest) {
 
   if (profile?.role !== 'admin') {
     if (isAdminApi) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    return NextResponse.redirect(new URL('/', request.url))
+    const loginUrl = new URL('/login', request.url)
+    loginUrl.searchParams.set('redirect', pathname)
+    loginUrl.searchParams.set('error', 'admin_required')
+    return NextResponse.redirect(loginUrl)
   }
 
   return NextResponse.next()

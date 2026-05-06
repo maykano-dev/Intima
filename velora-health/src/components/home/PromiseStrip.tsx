@@ -11,8 +11,8 @@ const promises = [
   },
   {
     icon: <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
-    title: 'Worldwide Delivery',
-    desc: 'Sea Freight (6-8 weeks) or Air Freight (10-16 days). Tracked to your door.',
+    title: 'Imported & Local',
+    desc: 'Global brands shipped to you, plus select items stocked right here in Ghana.',
   },
   {
     icon: <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>,

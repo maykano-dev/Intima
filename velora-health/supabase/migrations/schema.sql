@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS products (
   benefits TEXT,
   usage_guide TEXT,
   material TEXT,
+  product_link TEXT,
   price_ghs NUMERIC(10, 2) NOT NULL CHECK (price_ghs >= 0),
   compare_price_ghs NUMERIC(10, 2) CHECK (compare_price_ghs IS NULL OR compare_price_ghs >= 0),
   images TEXT[] DEFAULT '{}',
@@ -62,7 +63,20 @@ CREATE TABLE IF NOT EXISTS products (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 3d. CUSTOMER ADDRESSES — saved addresses linked to authenticated users
+-- 3d. PRODUCT VARIANTS — colors, sizes, etc. for each product
+CREATE TABLE IF NOT EXISTS product_variants (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL DEFAULT 'size' CHECK (type IN ('size', 'color', 'material', 'style')),
+  price_ghs NUMERIC(10, 2),
+  in_stock BOOLEAN NOT NULL DEFAULT true,
+  image TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 3e. CUSTOMER ADDRESSES — saved addresses linked to authenticated users
 CREATE TABLE IF NOT EXISTS customer_addresses (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -433,7 +447,9 @@ INSERT INTO categories (id, name, slug, description, image) VALUES
   ('lubricants',   'Lubricants & Enhancers',    'lubricants',   'Premium lubricants and arousal enhancers.',                          '/images/category-lubricants.jpg'),
   ('anal',         'Anal Products',             'anal',         'Anal play products for beginners and advanced users.',               '/images/category-anal.jpg'),
   ('wellness',     'Wellness & Accessories',    'wellness',     'Essential accessories and wellness products.',                       '/images/category-wellness.jpg'),
-  ('dildos',       'Dildos',                    'dildos',       'A wide range of dildos in various materials and styles.',            '/images/category-dildos.jpg')
+  ('dildos',       'Dildos',                    'dildos',       'A wide range of dildos in various materials and styles.',            '/images/category-dildos.jpg'),
+  ('herbal',       'Herbal Products',           'herbal',       'Natural herbal supplements for vitality and wellness.',               '/images/category-herbal.jpg'),
+  ('adult-games',  'Adult Games',               'adult-games',  'Fun and provocative games for couples and parties.',                  '/images/category-adult-games.jpg')
 ON CONFLICT (id) DO NOTHING;
 
 -- 7b. Products

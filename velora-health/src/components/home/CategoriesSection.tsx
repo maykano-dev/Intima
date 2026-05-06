@@ -7,6 +7,8 @@ const categories = [
   { num: '04', slug: 'lubricants', name: 'Lubricants & Enhancers', desc: 'Water-based, warming, and specialty formulas for comfort, sensitivity, and enhanced experience.' },
   { num: '05', slug: 'wellness', name: 'Herbal Wellness', desc: 'Locally inspired vitality tonics and libido support supplements. Energy and drive, naturally.' },
   { num: '06', slug: 'wellness', name: 'Accessories & Care', desc: 'Toy cleaners, storage solutions, intimate hygiene products, and protection essentials.' },
+  { num: '07', slug: 'herbal', name: 'Herbal Products', desc: 'Natural herbal supplements for vitality, libido support, and overall wellness.' },
+  { num: '08', slug: 'adult-games', name: 'Adult Games', desc: 'Fun and provocative games designed to spice things up for couples and parties.' },
 ]
 
 export default function CategoriesSection() {
