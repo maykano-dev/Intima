@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     // Get the origin for the redirect URL
     const requestUrl = new URL(request.url)
     const origin = requestUrl.origin
-    const redirectTo = `${origin}/auth/callback-redirect?next=/update-password`
+    const redirectTo = `${origin}/auth/callback?next=/update-password`
 
     // Trigger Supabase's built-in password reset email
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
