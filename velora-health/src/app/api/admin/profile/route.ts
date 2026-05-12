@@ -18,19 +18,38 @@ export async function GET(request: NextRequest) {
         }
       )
 
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.user) return NextResponse.json({ user: null }, { status: 401 })
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      if (authError || !user) {
+        console.warn('Admin profile: Not authenticated', authError?.message)
+        return NextResponse.json({ user: null }, { status: 401 })
+      }
 
       const admin = getSupabaseAdmin()!
-      if (!admin) return NextResponse.json({ error: 'DB not configured' }, { status: 500 })
-      const { data: profile, error } = await admin
+      if (!admin) {
+        console.error('Admin profile: Supabase Admin client not configured')
+        return NextResponse.json({ error: 'DB not configured' }, { status: 500 })
+      }
+      
+      // 1. Get the profile
+      const { data: profile } = await admin
         .from('profiles')
         .select('*')
-        .eq('id', session.user.id)
+        .eq('id', user.id)
         .single()
 
-      if (error) throw error
-      return NextResponse.json({ user: session.user, profile })
+      // 2. Check if the user is in the admins table
+      const { data: adminRecord } = await admin
+        .from('admins')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .single()
+
+      const role = adminRecord ? 'admin' : (profile?.role || 'customer')
+      
+      return NextResponse.json({ 
+        user, 
+        profile: { ...profile, role } 
+      })
     }
 
     const session = mockGetSession().data.session

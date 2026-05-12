@@ -1,10 +1,11 @@
-'use client'
+'use client'; // Re-triggering HMR to resolve useRef reference issue
 
-import { useState, Suspense } from 'react'
+import { useState, useEffect, Suspense, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
+import { toast } from 'sonner'
 
 function LoginForm() {
   const router = useRouter()
@@ -12,6 +13,9 @@ function LoginForm() {
   const redirectTo = searchParams.get('redirect') || '/dashboard'
   const isAdminLogin = redirectTo.startsWith('/admin')
   const accessError = searchParams.get('error')
+  const isVerified = searchParams.get('verified') === 'true'
+  const isRegistered = searchParams.get('registered') === 'true'
+  const toastShown = useRef(false)
   
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -20,6 +24,25 @@ function LoginForm() {
   const [unconfirmedEmail, setUnconfirmedEmail] = useState('')
   const [resending, setResending] = useState(false)
   const [resent, setResent] = useState(false)
+
+  useEffect(() => {
+    if (toastShown.current) return
+
+    if (isVerified) {
+      toast.success('Email confirmed! You can now sign in.', {
+        duration: 5000,
+        position: 'top-center',
+      })
+      toastShown.current = true
+    }
+    if (isRegistered) {
+      toast.success('Account created successfully! You can now sign in.', {
+        duration: 5000,
+        position: 'top-center',
+      })
+      toastShown.current = true
+    }
+  }, [isVerified, isRegistered])
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -99,21 +122,9 @@ function LoginForm() {
       </div>
       {error && <p className="text-sm text-danger">{error}</p>}
       {unconfirmedEmail && (
-        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-sm space-y-3">
-          <p className="text-amber-600 font-medium">Email not confirmed</p>
-          <p className="text-muted">Please confirm your email address before signing in. Check your inbox for the confirmation link.</p>
-          {resent ? (
-            <p className="text-success font-medium">Confirmation email sent! Check your inbox.</p>
-          ) : (
-            <button
-              type="button"
-              onClick={handleResend}
-              disabled={resending}
-              className="text-sm text-primary hover:underline disabled:opacity-50"
-            >
-              {resending ? 'Sending...' : 'Resend confirmation email'}
-            </button>
-          )}
+        <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-sm space-y-2">
+          <p className="text-amber-500 font-bold">Email not verified</p>
+          <p className="text-[#8A7F76]">Please contact support to verify your account as email confirmation is currently unavailable.</p>
         </div>
       )}
       <Button type="submit" variant="primary" size="lg" fullWidth loading={loading}>

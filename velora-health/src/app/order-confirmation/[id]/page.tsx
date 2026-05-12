@@ -11,16 +11,16 @@ function OrderConfirmationContent() {
   const searchParams = useSearchParams()
   const reference = searchParams.get('ref')
 
-  const [countdown, setCountdown] = useState(10)
+  const [countdown, setCountdown] = useState(5)
 
   useEffect(() => {
     if (countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000)
       return () => clearTimeout(timer)
     } else {
-      router.push('/')
+      router.push(`/dashboard/orders/${id}`)
     }
-  }, [countdown, router])
+  }, [countdown, router, id])
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -62,17 +62,17 @@ function OrderConfirmationContent() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link href="/shop">
-            <Button variant="primary">Continue Shopping</Button>
+          <Link href={`/dashboard/orders/${id}`}>
+            <Button variant="primary">View Order Details</Button>
           </Link>
-          <Link href="/">
-            <Button variant="outline">Back to Home</Button>
+          <Link href="/shop">
+            <Button variant="outline">Continue Shopping</Button>
           </Link>
         </div>
 
         {countdown > 0 && (
-          <p className="text-xs text-muted mt-6">
-            Redirecting to home in {countdown} seconds...
+          <p className="text-xs text-muted mt-6 font-medium">
+            Redirecting to your order dashboard in {countdown} seconds...
           </p>
         )}
       </div>

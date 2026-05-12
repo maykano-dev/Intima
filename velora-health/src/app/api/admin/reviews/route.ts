@@ -5,6 +5,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const approved = searchParams.get('approved')
+    const productId = searchParams.get('product_id')
 
     let query = getSupabaseAdmin()!
       .from('reviews')
@@ -13,6 +14,7 @@ export async function GET(request: Request) {
 
     if (approved === 'true') query = query.eq('approved', true)
     else if (approved === 'false') query = query.eq('approved', false)
+    if (productId) query = query.eq('product_id', productId)
 
     const { data, error } = await query
 
@@ -27,14 +29,19 @@ export async function GET(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const body = await request.json()
-    const { id, approved } = body
+    const { id, approved, admin_reply } = body
 
     if (!id) {
       return NextResponse.json({ error: 'Review ID required' }, { status: 400 })
     }
 
-    const updates: Record<string, boolean> = {}
+    const updates: any = {}
     if (approved !== undefined) updates.approved = approved
+    if (admin_reply !== undefined) {
+      updates.admin_reply = admin_reply
+      updates.replied_at = new Date().toISOString()
+      updates.approved = true // Auto-approve if replied? Maybe.
+    }
 
     const { data, error } = await getSupabaseAdmin()!
       .from('reviews')

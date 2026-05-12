@@ -6,7 +6,9 @@ import Image from 'next/image';
 import './landing.css';
 
 export default function LandingPage() {
-  const [isAgeConfirmed, setIsAgeConfirmed] = useState(true); // Default to true to avoid flicker if already confirmed
+  const [isAgeConfirmed, setIsAgeConfirmed] = useState(true);
+  const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
+  const [loadingFeatured, setLoadingFeatured] = useState(true);
 
   useEffect(() => {
     // Check Age Confirmation
@@ -18,8 +20,42 @@ export default function LandingPage() {
       document.body.style.overflow = '';
     }
 
+    // Fetch Featured Products
+    async function fetchFeatured() {
+      try {
+        const res = await fetch('/api/products?featured=true&limit=4');
+        if (res.ok) {
+          const data = await res.json();
+          setFeaturedProducts(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch featured products:', err);
+      } finally {
+        setLoadingFeatured(false);
+      }
+    }
+    fetchFeatured();
+
+    // Intersection Observer for Reveal
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+        }
+      });
+    }, observerOptions);
+
+    const revealElements = document.querySelectorAll('.reveal');
+    revealElements.forEach(el => observer.observe(el));
+
     return () => {
       document.body.style.overflow = '';
+      observer.disconnect();
     };
   }, []);
 
@@ -48,7 +84,7 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section id="hero">
         <div className="hero-content">
-          <span className="hero-eyebrow reveal">Ghana's Most Discreet Wellness Boutique</span>
+          <span className="hero-eyebrow reveal">Ghana's Most Discreet Wellness Boutique (Updated)</span>
           <h1 className="hero-title reveal">Your wellness, <br /><span>absolute</span> privacy.</h1>
           <p className="hero-desc reveal">Premium intimate wellness products delivered in unmarked packaging. No questions. No labels. Just you.</p>
           <div className="hero-btns reveal">
@@ -58,12 +94,13 @@ export default function LandingPage() {
         </div>
         <div className="hero-image-container">
           <Image 
-            src="/assets/hero.png" 
+            src="/assets/hero.jpg" 
             alt="Wellness" 
             fill
             priority
+            unoptimized
             className="hero-image"
-            sizes="50vw"
+            sizes="100vw"
           />
           <div className="hero-image-overlay"></div>
         </div>
@@ -131,6 +168,52 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Featured Products */}
+      <section id="featured" className="featured">
+        <div className="section-header reveal">
+          <span className="section-eyebrow">Handpicked</span>
+          <h2 className="section-title">The <span>discreet</span> essentials</h2>
+        </div>
+        
+        <div className="featured-grid">
+          {featuredProducts.length > 0 ? (
+            featuredProducts.map((product) => (
+              <Link key={product.id} href={`/product/${product.slug}`} className="featured-card reveal">
+                <div className="featured-img-container">
+                  <Image 
+                    src={product.images?.[0] || '/assets/placeholder.jpg'} 
+                    alt={product.name} 
+                    fill
+                    unoptimized
+                    className="featured-img"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                  />
+                  <div className="featured-badge">{product.category_name}</div>
+                </div>
+                <div className="featured-info">
+                  <h3 className="featured-name">{product.name}</h3>
+                  <div className="featured-price">
+                    {product.price_ghs ? (
+                      <span className="price-ghs">GHS {product.price_ghs}</span>
+                    ) : (
+                      <span className="price-cny">¥ {product.price_cny}</span>
+                    )}
+                  </div>
+                </div>
+              </Link>
+            ))
+          ) : !loadingFeatured && (
+            <div className="col-span-full text-center py-12 text-sage opacity-50">
+              Check back soon for our featured collection.
+            </div>
+          )}
+        </div>
+        
+        <div className="featured-cta reveal">
+          <Link href="/shop" className="btn-hero btn-hero-secondary">View All Essentials</Link>
+        </div>
+      </section>
+
       {/* Collections */}
       <section id="collections" className="collections">
         <div className="section-header reveal">
@@ -140,9 +223,10 @@ export default function LandingPage() {
         <div className="collection-grid">
           <Link href="/shop" className="collection-card reveal">
             <Image 
-              src="/assets/cat1.png" 
+              src="/assets/personal-care.jpg" 
               alt="Wellness" 
               fill
+              unoptimized
               className="collection-img"
               sizes="(max-width: 768px) 100vw, 50vw"
             />
@@ -155,9 +239,10 @@ export default function LandingPage() {
           </Link>
           <Link href="/shop" className="collection-card reveal">
             <Image 
-              src="/assets/cat2.png" 
+              src="/assets/connection.jpg" 
               alt="Couples" 
               fill
+              unoptimized
               className="collection-img"
               sizes="(max-width: 768px) 100vw, 50vw"
             />
@@ -175,12 +260,14 @@ export default function LandingPage() {
       <section id="why" className="why">
         <div className="why-image-container reveal">
           <Image 
-            src="/assets/cat1.png" 
+            src="/assets/comfort.jpg" 
             alt="Privacy" 
             fill
+            unoptimized
             className="why-image"
             sizes="(max-width: 1024px) 100vw, 40vw"
           />
+          <div className="why-image-overlay mobile-only"></div>
         </div>
         <div className="why-content">
           <span className="section-eyebrow reveal">The Intima Standard</span>
@@ -191,8 +278,8 @@ export default function LandingPage() {
               <p className="why-item-desc">We never share your data. Your privacy is built into every step.</p>
             </div>
             <div className="why-item reveal">
-              <h3 className="why-item-title">Neutral Billing</h3>
-              <p className="why-item-desc">"Intima" will never appear on your bank or MoMo statement.</p>
+              <h3 className="why-item-title">Curated Selection</h3>
+              <p className="why-item-desc">From premium intimate essentials to luxury connection tools, we source only the world's finest wellness brands.</p>
             </div>
             <div className="why-item reveal">
               <h3 className="why-item-title">Body-Safe Materials</h3>

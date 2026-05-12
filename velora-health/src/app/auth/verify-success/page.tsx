@@ -14,7 +14,7 @@ export default function VerifySuccessPage() {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer)
-          router.push('/login')
+          router.push('/login?verified=true')
           return 0
         }
         return prev - 1
@@ -63,7 +63,7 @@ export default function VerifySuccessPage() {
         </div>
 
         <div className="pt-4">
-          <Link href="/login">
+          <Link href="/login?verified=true">
             <Button variant="primary" size="lg" fullWidth>
               Go to Login Now
             </Button>

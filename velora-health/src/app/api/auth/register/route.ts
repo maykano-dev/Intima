@@ -5,7 +5,7 @@ import { sendEmail, emailTemplates } from '@/lib/email'
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password } = await request.json()
+    const { name, email, phone, password } = await request.json()
 
     if (!email || !password) {
       return NextResponse.json({ error: 'Email and password required' }, { status: 400 })
@@ -14,53 +14,56 @@ export async function POST(request: Request) {
     if (password.length < 6) {
       return NextResponse.json({ error: 'Password must be at least 6 characters' }, { status: 400 })
     }
-
     if (isSupabaseConfigured()) {
+      console.log('Register: Using Supabase Auth (Admin Creation)')
       const supabase = getAdminSupabase()
       if (!supabase) throw new Error('Admin Supabase not configured')
 
-      // 1. Generate the signup link (this also creates the user)
-      const { data, error } = await supabase.auth.admin.generateLink({
-        type: 'signup',
+      // 1. Create the user directly as confirmed
+      const { data, error } = await supabase.auth.admin.createUser({
         email,
         password,
-        options: { 
-          data: { full_name: name || '' },
-          redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`
+        email_confirm: true,
+        user_metadata: { 
+          full_name: name || '',
+          phone: phone || ''
         }
       })
 
       if (error) {
-        // Handle case where user already exists
-        if (error.message.includes('already registered')) {
-          return NextResponse.json({ error: 'User already exists' }, { status: 400 })
+        console.error('Register: Supabase Admin Error:', error.message)
+        if (error.message.includes('already registered') || error.message.includes('already exists')) {
+          return NextResponse.json({ error: 'User already exists. Please sign in.' }, { status: 400 })
         }
         return NextResponse.json({ error: error.message }, { status: 400 })
       }
 
-      // 2. Send the custom email via AhaSend
-      const { error: emailError } = await sendEmail({
-        to: email,
-        subject: 'Welcome to Intima - Confirm Your Account',
-        html: emailTemplates.confirmation(name || 'there', data.properties.action_link)
-      })
+      console.log('Register: Success (Auto-confirmed)!')
 
-      if (emailError) {
-        console.error('Manual email send failed:', emailError)
-        // We still return 201 because the user IS created in Supabase
-        return NextResponse.json(
-          { message: `Account created, but email failed: ${emailError}. Please check SMTP keys.`, user: data.user },
-          { status: 201 }
-        )
+      // 2. Update the profile with the phone number (since the trigger might not handle it)
+      if (phone) {
+        console.log('Register: Updating profile with phone:', phone)
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ phone })
+          .eq('id', data.user.id)
+        
+        if (profileError) {
+          console.error('Register: Profile Update Error:', profileError.message)
+          // We don't fail the whole registration if profile update fails, 
+          // but we log it.
+        }
       }
 
       return NextResponse.json(
-        { message: 'Account created. Check your email for confirmation.', user: data.user },
+        { message: 'Account created successfully.', user: data.user },
         { status: 201 }
       )
     }
 
-    const result = mockSignUp(email, password, name)
+    console.log('Register: Using Mock Auth (Config Missing)')
+
+    const result = mockSignUp(email, password, name, phone)
     if (result.error) return NextResponse.json({ error: result.error.message }, { status: 400 })
     return NextResponse.json(
       { message: 'Account created successfully.', user: result.data.user },

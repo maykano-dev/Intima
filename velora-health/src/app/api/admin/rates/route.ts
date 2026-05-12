@@ -6,13 +6,13 @@ export async function GET() {
     const { data, error } = await getSupabaseAdmin()!
       .from('platform_settings')
       .select('*')
-      .order('created_at', { ascending: false })
+      .order('updated_at', { ascending: false })
       .limit(1)
       .single()
 
     if (error) {
       if (error.code === 'PGRST116') {
-        return NextResponse.json({ exchange_rate_cny_to_ghs: 0.28 })
+        return NextResponse.json({ exchange_rate_cny_to_ghs: 0.52 })
       }
       throw error
     }
@@ -20,7 +20,7 @@ export async function GET() {
     return NextResponse.json(data)
   } catch (error) {
     console.error('Admin rates fetch error:', error)
-    return NextResponse.json({ exchange_rate_cny_to_ghs: 0.28 })
+    return NextResponse.json({ exchange_rate_cny_to_ghs: 0.52 })
   }
 }
 

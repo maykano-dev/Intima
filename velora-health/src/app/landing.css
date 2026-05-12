@@ -222,38 +222,6 @@ main:has(#hero) {
   overflow: hidden;
 }
 
-@media (max-width: 768px) {
-  #hero {
-    padding-top: 10rem;
-    padding-bottom: 5rem;
-    flex-direction: column;
-    text-align: center;
-  }
-  .hero-content {
-    width: 100%;
-    margin-bottom: 3rem;
-  }
-  .hero-image-container {
-    position: relative;
-    width: 100%;
-    height: 300px;
-  }
-  .hero-image-overlay {
-    background: linear-gradient(to top, var(--midnight) 0%, transparent 40%);
-  }
-  .hero-title {
-    font-size: clamp(2.5rem, 10vw, 3.5rem);
-  }
-  .hero-btns {
-    justify-content: center;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .btn-hero {
-    width: 100%;
-  }
-}
-
 .hero-content {
   width: 50%;
   z-index: 2;
@@ -502,6 +470,78 @@ main:has(#hero) {
   color: var(--white);
   border-bottom: 1px solid var(--gold);
   padding-bottom: 0.5rem;
+}
+
+/* Featured Section */
+.featured {
+  padding: 10rem 5%;
+  background: var(--midnight);
+}
+
+.featured-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin-bottom: 6rem;
+}
+
+.featured-card {
+  display: block;
+  transition: var(--transition);
+}
+
+.featured-img-container {
+  position: relative;
+  aspect-ratio: 1/1;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  background: var(--forest);
+  border: 1px solid var(--glass-border);
+}
+
+.featured-img {
+  object-fit: cover;
+  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.featured-card:hover .featured-img {
+  transform: scale(1.1);
+}
+
+.featured-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: var(--gold);
+  color: var(--midnight);
+  padding: 0.4rem 1rem;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: bold;
+  z-index: 2;
+}
+
+.featured-info {
+  text-align: center;
+}
+
+.featured-name {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--champagne);
+}
+
+.featured-price {
+  font-size: 1.1rem;
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.featured-cta {
+  display: flex;
+  justify-content: center;
 }
 
 /* Why Section */
@@ -864,6 +904,7 @@ main:has(#hero) {
   .hero-image-container { display: none; }
   .hero-btns { justify-content: center; }
   .promise { grid-template-columns: repeat(2, 1fr); }
+  .featured-grid { grid-template-columns: repeat(2, 1fr); }
   .collection-grid { grid-template-columns: 1fr; }
   .why { flex-direction: column; }
   .why-image, .why-content { width: 100%; }
@@ -877,4 +918,112 @@ main:has(#hero) {
   .promise { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr; }
   .footer-bottom { flex-direction: column; gap: 2rem; text-align: center; }
+
+  /* Hero Mobile Fix */
+  #hero {
+    padding-top: 8rem;
+    padding-bottom: 4rem;
+    text-align: center;
+    justify-content: center;
+    background-image: linear-gradient(rgba(10, 20, 16, 0.6), rgba(10, 20, 16, 0.6)), url('/assets/hero.jpg');
+    background-size: cover;
+    background-position: top center;
+    background-repeat: no-repeat;
+    position: relative;
+    min-height: 80vh;
+  }
+  .hero-content {
+    width: 100%;
+    margin-bottom: 0;
+    position: relative;
+    z-index: 2;
+  }
+  .hero-image-container {
+    display: none !important;
+  }
+  .hero-title {
+    font-size: clamp(2.8rem, 12vw, 3.8rem) !important;
+  }
+  .hero-btns {
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .btn-hero {
+    width: 100%;
+  }
+
+  /* Featured Mobile Carousel */
+  .featured {
+    padding: 6rem 0; /* Full bleed scroll */
+  }
+  .featured .section-header {
+    padding: 0 5%;
+  }
+  .featured-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 1.5rem;
+    padding: 2rem 15% 4rem; /* Wide padding for snap centering */
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  .featured-grid::-webkit-scrollbar {
+    display: none;
+  }
+  .featured-card {
+    flex: 0 0 85%;
+    max-width: none;
+    scroll-snap-align: center;
+    transition: transform 0.5s ease;
+  }
+  /* Elevation effect - subtle scale for the "active" visual */
+  .featured-card:active, .featured-card:hover {
+    transform: scale(1.02) translateY(-10px);
+  }
+  .featured-cta {
+    padding: 0 5%;
+  }
+
+  /* Why Mobile Fix */
+  .why {
+    position: relative;
+    padding: 8rem 5% !important;
+    background-image: linear-gradient(rgba(10, 20, 16, 0.85), rgba(10, 20, 16, 0.85)), url('/assets/comfort.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    text-align: center;
+    overflow: hidden;
+  }
+  .why-image-container {
+    display: none !important;
+  }
+  .why-content {
+    width: 100% !important;
+    position: relative;
+    z-index: 2;
+  }
+  .why-title {
+    font-size: 3rem !important;
+    margin-bottom: 3rem;
+  }
+  .why-list {
+    margin-top: 2rem;
+  }
+  .why-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+    padding: 1.5rem 0;
+  }
+  .why-item-title {
+    font-size: 1.5rem;
+  }
+  .why-item-desc {
+    max-width: 100%;
+    font-size: 0.85rem;
+  }
 }

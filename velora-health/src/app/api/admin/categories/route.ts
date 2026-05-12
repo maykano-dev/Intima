@@ -31,7 +31,7 @@ export async function POST(request: Request) {
       .insert({
         id,
         name: sanitizeInput(name),
-        slug,
+        slug: slug || id,
         description: description ? sanitizeInput(description) : '',
         image: image || null,
       })

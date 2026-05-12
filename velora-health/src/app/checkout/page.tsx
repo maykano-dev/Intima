@@ -3,11 +3,10 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useCart } from '@/components/cart/CartProvider'
-import { formatPrice, sanitizeInput, isValidGhanaPhone } from '@/lib/utils'
-import { getPaystackPublicKey } from '@/lib/paystack'
+import { formatPrice, sanitizeInput, isValidGhanaPhone, cn } from '@/lib/utils'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
-import { cn } from '@/lib/utils'
+import PaymentModal from '@/components/checkout/PaymentModal'
 
 type ShippingMethod = 'sea' | 'air'
 
@@ -30,24 +29,7 @@ interface FormErrors {
   [key: string]: string
 }
 
-declare global {
-  interface Window {
-    PaystackPop: {
-      setup: (config: {
-        key: string
-        email: string
-        amount: number
-        currency: string
-        ref: string
-        metadata: Record<string, unknown>
-        callback: (response: { reference: string }) => void
-        onClose: () => void
-      }) => {
-        openIframe: () => void
-      }
-    }
-  }
-}
+type PaymentStatus = 'idle' | 'pending' | 'otp_required' | 'paid' | 'failed'
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -67,8 +49,18 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitting, setSubmitting] = useState(false)
   const [paymentLoading, setPaymentLoading] = useState(false)
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('idle')
+  const [paymentMessage, setPaymentMessage] = useState('')
+  const [orderId, setOrderId] = useState<string | null>(null)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [authenticated, setAuthenticated] = useState(false)
   const [authChecked, setAuthChecked] = useState(false)
+
+  const groups = useMemo(() => {
+    const local = items.filter((i) => i.delivery_profile === 'local')
+    const standard = items.filter((i) => i.delivery_profile !== 'local')
+    return { local, standard }
+  }, [items])
 
   useEffect(() => {
     async function checkAuth() {
@@ -118,11 +110,6 @@ export default function CheckoutPage() {
 
   if (!authenticated) return null
 
-  const groups = useMemo(() => {
-    const local = items.filter((i) => i.delivery_profile === 'local')
-    const standard = items.filter((i) => i.delivery_profile !== 'local')
-    return { local, standard }
-  }, [items])
 
   const isMixed = groups.local.length > 0 && groups.standard.length > 0
 
@@ -148,14 +135,10 @@ export default function CheckoutPage() {
   async function handlePayWithMoMo() {
     if (!validate() || !profile) return
 
-    const paystackPublicKey = getPaystackPublicKey()
-    if (!paystackPublicKey || paystackPublicKey.startsWith('pk_test_')) {
-      setErrors({ phone: 'Payment not configured.' })
-      return
-    }
-
     setSubmitting(true)
     setPaymentLoading(true)
+    setPaymentStatus('pending')
+    setPaymentMessage('Creating your order...')
 
     try {
       const orderRes = await fetch('/api/create-order', {
@@ -173,9 +156,12 @@ export default function CheckoutPage() {
           },
           items: items.map((item) => ({
             product_id: item.product_id,
-            product_name: item.name,
+            product_name: item.name + (item.variant_value ? ` (${item.variant_value})` : ''),
             quantity: item.quantity,
             unit_price: item.price_ghs,
+            variant_option: item.variant_option || '',
+            variant_value: item.variant_value || '',
+            variant_image: item.variant_image || '',
           })),
           total,
           shipping_method: shippingMethod,
@@ -185,49 +171,24 @@ export default function CheckoutPage() {
 
       if (!orderRes.ok) throw new Error('Failed to create order')
       const order = await orderRes.json()
-
-      const reference = `INT-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
-      const handler = window.PaystackPop.setup({
-        key: paystackPublicKey,
-        email: profile.email || '',
-        amount: Math.round(total * 100),
-        currency: 'GHS',
-        ref: reference,
-        metadata: {
-          order_id: order.id,
-          custom_fields: [
-            { display_name: 'Customer Name', variable_name: 'customer_name', value: profile.full_name || 'Customer' },
-            { display_name: 'Phone', variable_name: 'phone', value: form.phone },
-          ],
-        },
-        callback: async (response) => {
-          try {
-            await fetch('/api/create-order', {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                order_id: order.id,
-                payment_reference: response.reference,
-                status: 'paid',
-              }),
-            })
-          } catch {
-            // Handled by webhook
-          }
-          clearCart()
-          router.push(`/order-confirmation/${order.id}?ref=${response.reference}`)
-        },
-        onClose: () => {
-          setPaymentLoading(false)
-          setSubmitting(false)
-        },
-      })
-      handler.openIframe()
+      setOrderId(order.id)
+      
+      // Open the premium payment modal
+      setShowPaymentModal(true)
+      setSubmitting(false)
+      setPaymentLoading(false)
+      setPaymentStatus('idle') // Reset local state as modal takes over
     } catch {
-      setErrors({ email: 'Failed to process order. Please try again.' })
+      setPaymentStatus('failed')
+      setPaymentMessage('Failed to create order. Please try again.')
       setSubmitting(false)
       setPaymentLoading(false)
     }
+  }
+
+  function handlePaymentSuccess() {
+    clearCart()
+    router.push(`/order-confirmation/${orderId}`)
   }
 
   if (items.length === 0) {
@@ -444,26 +405,32 @@ export default function CheckoutPage() {
                 size="lg"
                 fullWidth
                 onClick={handlePayWithMoMo}
-                loading={submitting && paymentLoading}
+                loading={submitting || paymentLoading}
                 disabled={submitting}
               >
-                {paymentLoading ? 'Processing...' : `Pay ${formatPrice(total)}`}
+                {submitting ? 'Processing...' : `Pay ${formatPrice(total)}`}
               </Button>
 
-              <div className="flex items-center justify-center gap-3 text-xs text-muted">
-                <span>MTN MoMo</span>
-                <span className="w-1 h-1 rounded-full bg-muted" />
-                <span>Vodafone Cash</span>
-                <span className="w-1 h-1 rounded-full bg-muted" />
-                <span>Visa/MC</span>
-              </div>
-              <p className="text-xs text-muted text-center">
-                Secure payment powered by Paystack. Your information is encrypted.
+              <p className="text-xs text-muted text-center pt-2">
+                Secure payment powered by Moolre. Pay with Mobile Money.
               </p>
+
+              {paymentStatus === 'failed' && paymentMessage && (
+                <p className="text-xs text-danger text-center bg-danger/5 py-2 px-3 rounded-lg border border-danger/20">{paymentMessage}</p>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      <PaymentModal
+        open={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        total={total}
+        orderId={orderId || ''}
+        initialPhone={form.phone}
+        onSuccess={handlePaymentSuccess}
+      />
     </div>
   )
 }

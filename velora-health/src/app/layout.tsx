@@ -1,59 +1,45 @@
 import type { Metadata, Viewport } from 'next'
-import './globals.css'
-import './landing.css'
-import { CartProvider } from '@/components/cart/CartProvider'
-import Navbar from '@/components/layout/Navbar'
-import Footer from '@/components/layout/Footer'
-import BackToTop from '@/components/layout/BackToTop'
 import { ThemeProvider } from '@/components/layout/ThemeProvider'
 import RevealObserver from '@/components/layout/RevealObserver'
+import BackToTop from '@/components/layout/BackToTop'
+import '@/app/globals.css'
 import ConditionalLayout from '@/components/layout/ConditionalLayout'
 import CartDrawer from '@/components/layout/CartDrawer'
+import { CartProvider } from '@/components/cart/CartProvider'
 import { Toaster } from 'sonner'
 
-
-
 export const viewport: Viewport = {
-  themeColor: '#0a0a0a',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
+  userScalable: false,
+  themeColor: '#000000',
 }
 
 export const metadata: Metadata = {
-  title: {
-    default: 'Intima Wellness | Discreet Delivery & Absolute Privacy Ghana',
-    template: '%s | Intima Wellness'
-  },
-  description: 'Ghana\'s premium discreet wellness shop. Fast, anonymous doorstep delivery of health, lifestyle, and intimacy essentials. Absolute privacy guaranteed with plain packaging and secure MoMo payments.',
-  keywords: [
-    'wellness Ghana', 'discreet delivery Accra', 'privacy-focused shopping', 'lifestyle essentials Ghana', 
-    'anonymous delivery', 'plain packaging shop', 'health products Accra', 'wellness products Kumasi', 
-    'secure intimacy shopping', 'discreet fulfillment', 'MoMo payment shop', 'anonymous wellness', 
-    'Intima wellness', 'Ghana health and wellness', 'fast delivery Accra', 'doorstep delivery Ghana'
-  ],
+  title: 'Intima - Premium Adult Store',
+  description: 'Shop the most exclusive adult toys and accessories in Ghana.',
+  keywords: ['adult store', 'ghana', 'toys', 'wellness', 'intima'],
   authors: [{ name: 'Intima' }],
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   openGraph: {
-    type: 'website',
-    locale: 'en_GH',
-    url: '/',
-    siteName: 'Intima Wellness',
-    title: 'Intima Wellness | Absolute Privacy',
-    description: 'Premium wellness and lifestyle essentials. Discreetly delivered.',
+    title: 'Intima - Premium Adult Store',
+    description: 'Exclusive adult toys and wellness accessories in Ghana.',
+    url: 'https://intima.love',
+    siteName: 'Intima',
     images: [
       {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'Intima Wellness',
       },
     ],
+    locale: 'en_GH',
+    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Intima Wellness | Absolute Privacy',
-    description: 'Premium wellness essentials. Discreetly delivered.',
+    title: 'Intima - Premium Adult Store',
+    description: 'Exclusive adult toys and wellness accessories in Ghana.',
     images: ['/og-image.jpg'],
   },
   robots: {
@@ -84,8 +70,6 @@ export default function RootLayout({
             <CartDrawer />
             <Toaster position="bottom-right" theme="dark" richColors />
             <BackToTop />
-
-
           </CartProvider>
         </ThemeProvider>
       </body>

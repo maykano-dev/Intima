@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (isSupabaseConfigured()) {
-      const response = NextResponse.json({})
+      const response = NextResponse.json({ success: true })
 
       const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,7 +32,21 @@ export async function POST(request: NextRequest) {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) return NextResponse.json({ error: error.message }, { status: 401 })
 
-      return NextResponse.json({ user: data.user, session: data.session })
+      // Update response body with data, but KEEP the response object to preserve cookies
+      const finalResponse = NextResponse.json(
+        { user: data.user, session: data.session },
+        { status: 200 }
+      )
+      
+      // Copy cookies from the interim response to the final response
+      response.cookies.getAll().forEach(cookie => {
+        finalResponse.cookies.set(cookie.name, cookie.value, {
+          path: '/',
+          ...cookie
+        })
+      })
+
+      return finalResponse
     }
 
     const result = mockSignIn(email, password)

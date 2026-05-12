@@ -98,14 +98,25 @@ export async function GET(request: Request) {
           if (error && error.code !== 'PGRST116') throw error
 
           if (data) {
+            const { product_link, ...productData } = data
+            let variants: unknown[] = []
+            try {
+              const { data: vData } = await getSupabaseAdmin()!
+                .from('product_variants')
+                .select('*')
+                .eq('product_id', data.id)
+                .order('sort_order', { ascending: true })
+              if (vData) variants = vData
+            } catch {}
             return NextResponse.json({
-              ...data,
+              ...productData,
               category_name: data.categories?.name || null,
               categories: undefined,
               price_cny: data.price_cny || null,
               availability_status: data.availability_status || (data.in_stock ? 'in_ghana' : 'pre_order'),
               delivery_profile: data.delivery_profile || 'standard',
               lead_time: data.lead_time || '7-14 Days',
+              variants,
             });
           }
 
@@ -135,15 +146,35 @@ export async function GET(request: Request) {
         if (error) throw error
 
         if (data && data.length > 0) {
-          const transformed = data.map((item: Record<string, unknown>) => ({
-            ...item,
-            category_name: (item.categories as { name?: string })?.name || null,
-            categories: undefined,
-            price_cny: item.price_cny || null,
-            availability_status: item.availability_status || ((item.in_stock as boolean) ? 'in_ghana' : 'pre_order'),
-            delivery_profile: item.delivery_profile || 'standard',
-            lead_time: item.lead_time || '7-14 Days',
-          }))
+          const productIds = data.map((item: Record<string, unknown>) => item.id).filter(Boolean)
+          let variantsMap: Record<string, unknown[]> = {}
+          try {
+            const { data: vData } = await getSupabaseAdmin()!
+              .from('product_variants')
+              .select('*')
+              .in('product_id', productIds)
+              .order('sort_order', { ascending: true })
+            if (vData) {
+              for (const v of vData) {
+                const pid = v.product_id as string
+                if (!variantsMap[pid]) variantsMap[pid] = []
+                variantsMap[pid].push(v)
+              }
+            }
+          } catch {}
+          const transformed = data.map((item: Record<string, unknown>) => {
+            const { product_link, ...rest } = item
+            return {
+              ...rest,
+              category_name: (item.categories as { name?: string })?.name || null,
+              categories: undefined,
+              price_cny: item.price_cny || null,
+              availability_status: item.availability_status || ((item.in_stock as boolean) ? 'in_ghana' : 'pre_order'),
+              delivery_profile: item.delivery_profile || 'standard',
+              lead_time: item.lead_time || '7-14 Days',
+              variants: variantsMap[item.id as string] || [],
+            }
+          })
           return NextResponse.json(transformed)
         }
       } catch {

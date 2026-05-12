@@ -190,7 +190,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* Logout/Bottom Area */}
           <div className="p-4 border-t border-[rgba(242,232,223,0.05)]">
             <button 
-              onClick={() => router.push('/api/auth/logout')}
+              onClick={async () => {
+                await fetch('/api/auth/logout', { method: 'POST' })
+                router.replace('/login')
+                router.refresh()
+              }}
               className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium text-[#EF4444] hover:bg-red-500/10 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

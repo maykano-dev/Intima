@@ -26,15 +26,21 @@ export async function GET(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const body = await request.json()
-    const { id, read } = body
+    const { id, read, admin_reply } = body
 
     if (!id) {
       return NextResponse.json({ error: 'Message ID required' }, { status: 400 })
     }
 
+    const updates: any = { read: read ?? true }
+    if (admin_reply !== undefined) {
+      updates.admin_reply = admin_reply
+      updates.replied_at = new Date().toISOString()
+    }
+
     const { data, error } = await getSupabaseAdmin()!
       .from('contact_messages')
-      .update({ read: read ?? true })
+      .update(updates)
       .eq('id', id)
       .select()
       .single()

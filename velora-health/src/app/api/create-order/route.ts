@@ -41,11 +41,11 @@ export async function POST(request: Request) {
     try {
       const { data: rateData } = await getSupabaseAdmin()!
         .from('platform_settings')
-        .select('exchange_rate')
-        .order('created_at', { ascending: false })
+        .select('exchange_rate_cny_to_ghs')
+        .order('updated_at', { ascending: false })
         .limit(1)
         .single()
-      if (rateData?.exchange_rate) exchangeRate = rateData.exchange_rate
+      if (rateData?.exchange_rate_cny_to_ghs) exchangeRate = Number(rateData.exchange_rate_cny_to_ghs)
     } catch {
       // ignore
     }
@@ -54,39 +54,76 @@ export async function POST(request: Request) {
       ? new Date(Date.now() + 49 * 86400000).toISOString().split('T')[0]
       : new Date(Date.now() + 13 * 86400000).toISOString().split('T')[0]
 
-    const { data: order, error: orderError } = await getSupabaseAdmin()!
-      .from('orders')
-      .insert({
-        id: orderId,
-        user_id: userId,
-        customer_name: sanitizeInput(customer.name),
-        customer_email: sanitizeInput(customer.email),
-        customer_phone: sanitizeInput(customer.phone),
-        customer_address: sanitizeInput(customer.address),
-        city: sanitizeInput(customer.city),
-        notes: sanitizeInput(customer.notes || ''),
-        total,
-        status: 'pending',
-        payment_status: 'pending',
-        discreet_packaging: customer.discreet_packaging,
-        estimated_delivery: estimatedDelivery,
-        shipping_option_id: shipping_method,
-        shipping_cost_cny: exchangeRate ? Math.round(shipping_cost * exchangeRate * 100) / 100 : null,
-        shipping_cost_ghs: shipping_cost,
-      })
-      .select()
-      .single()
+    let order, orderError;
+    try {
+      const { data: ord, error: err } = await getSupabaseAdmin()!
+        .from('orders')
+        .insert({
+          id: orderId,
+          user_id: userId,
+          customer_name: sanitizeInput(customer.name),
+          customer_email: sanitizeInput(customer.email),
+          customer_phone: sanitizeInput(customer.phone),
+          customer_address: sanitizeInput(customer.address),
+          city: sanitizeInput(customer.city),
+          notes: sanitizeInput(customer.notes || ''),
+          total,
+          status: 'pending',
+          payment_status: 'pending',
+          discreet_packaging: customer.discreet_packaging,
+          estimated_delivery: estimatedDelivery,
+          shipping_method: shipping_method,
+          shipping_cost_cny: exchangeRate ? Math.round(shipping_cost * exchangeRate * 100) / 100 : null,
+          shipping_cost_ghs: shipping_cost,
+        })
+        .select()
+        .single()
+      order = ord
+      orderError = err
+    } catch (err: any) {
+      if (err?.message?.includes('user_id') || err?.code === '42703') {
+        console.warn('user_id column missing in orders, retrying without it...')
+        const { data: ord, error: err2 } = await getSupabaseAdmin()!
+          .from('orders')
+          .insert({
+            id: orderId,
+            customer_name: sanitizeInput(customer.name),
+            customer_email: sanitizeInput(customer.email),
+            customer_phone: sanitizeInput(customer.phone),
+            customer_address: sanitizeInput(customer.address),
+            city: sanitizeInput(customer.city),
+            notes: sanitizeInput(customer.notes || ''),
+            total,
+            status: 'pending',
+            payment_status: 'pending',
+            discreet_packaging: customer.discreet_packaging,
+            estimated_delivery: estimatedDelivery,
+            shipping_method: shipping_method,
+            shipping_cost_cny: exchangeRate ? Math.round(shipping_cost * exchangeRate * 100) / 100 : null,
+            shipping_cost_ghs: shipping_cost,
+          })
+          .select()
+          .single()
+        order = ord
+        orderError = err2
+      } else {
+        throw err
+      }
+    }
 
     if (orderError) throw orderError
 
     // Insert order items
     const orderItems = items.map(
-      (item: { product_id: string; product_name: string; quantity: number; unit_price: number }) => ({
+      (item: { product_id: string; product_name: string; quantity: number; unit_price: number; variant_option?: string; variant_value?: string; variant_image?: string }) => ({
         order_id: orderId,
         product_id: item.product_id,
         product_name: sanitizeInput(item.product_name),
         quantity: item.quantity,
         unit_price: item.unit_price,
+        variant_option: item.variant_option || null,
+        variant_value: item.variant_value || null,
+        variant_image: item.variant_image || null,
       })
     )
 
@@ -94,7 +131,19 @@ export async function POST(request: Request) {
       .from('order_items')
       .insert(orderItems)
 
-    if (itemsError) throw itemsError
+    if (itemsError) {
+      // If any variant columns are missing, retry with only the core columns
+      if (itemsError.code === '42703') {
+        console.warn('One or more variant columns missing in order_items, retrying with core columns only...')
+        const coreItems = orderItems.map(({ variant_option, variant_value, variant_image, ...core }: any) => core)
+        const { error: retryError } = await getSupabaseAdmin()!
+          .from('order_items')
+          .insert(coreItems)
+        if (retryError) throw retryError
+      } else {
+        throw itemsError
+      }
+    }
 
     return NextResponse.json(order, { status: 201 })
   } catch (error) {

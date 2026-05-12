@@ -226,7 +226,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
 
           {/* Navigation Links */}
-          <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto">
+          <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto no-scrollbar">
             {adminLinks.map((link) => {
               const isActive = link.href === '/admin'
                 ? pathname === '/admin'
@@ -250,34 +250,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </Link>
               )
             })}
-
-            {/* Shop Button */}
-            <div className="pt-4 px-2">
-              <Link
-                href="/shop"
-                className="flex items-center justify-center gap-2 w-full py-3.5 bg-[rgba(191,160,117,0.1)] text-[#BFA075] border border-[rgba(191,160,117,0.2)] rounded-xl text-xs font-bold uppercase tracking-[0.1em] hover:bg-[#BFA075] hover:text-[#0A1410] transition-all no-underline"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-                Browse Shop
-              </Link>
-            </div>
           </nav>
 
           {/* Logout Area */}
           <div className="p-4 border-t border-[rgba(242,232,223,0.05)] space-y-1">
-            <Link
-              href="/"
-              className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium text-[#8A7F76] hover:text-[#F2E8DF] hover:bg-[rgba(242,232,223,0.03)] transition-all no-underline"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              Back to Site
-            </Link>
             <button
-              onClick={() => router.push('/api/auth/logout')}
+              onClick={async () => {
+                await fetch('/api/auth/logout', { method: 'POST' })
+                router.replace('/login')
+                router.refresh()
+              }}
               className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium text-[#EF4444] hover:bg-red-500/10 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

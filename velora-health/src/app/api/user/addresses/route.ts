@@ -1,15 +1,24 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { getSupabase, isSupabaseConfigured } from '@/lib/supabase'
+import { isSupabaseConfigured } from '@/lib/supabase'
 import { mockGetSession } from '@/lib/mock-auth'
 import { sanitizeInput } from '@/lib/utils'
+import { createClient } from '@/lib/supabase-server'
 
 async function getUserId(): Promise<string | null> {
   if (isSupabaseConfigured()) {
-    const supabase = getSupabase()!
-    if (!supabase) return null
-    const { data } = await supabase.auth.getSession()
-    return data.session?.user?.id || null
+    try {
+      const supabase = await createClient()
+      const { data: { user }, error } = await supabase.auth.getUser()
+      if (error) {
+        console.error('getUserId: getUser error:', error.message)
+        return null
+      }
+      return user?.id || null
+    } catch (e) {
+      console.error('getUserId: unexpected error:', e)
+      return null
+    }
   }
   const session = mockGetSession().data.session
   return session?.user?.id || null

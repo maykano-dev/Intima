@@ -5,11 +5,19 @@ import { mockSignOut } from '@/lib/mock-auth'
 export async function POST() {
   try {
     if (isSupabaseConfigured()) {
-      const supabase = getSupabase()!
-      if (supabase) await supabase.auth.signOut()
+      const { createClient } = await import('@/lib/supabase-server')
+      const supabase = await createClient()
+      await supabase.auth.signOut()
     }
     mockSignOut()
-    return NextResponse.json({ success: true })
+    
+    const response = NextResponse.json({ success: true })
+    
+    // Explicitly expire the supabase auth cookie if it remains
+    response.cookies.set('sb-access-token', '', { expires: new Date(0) })
+    response.cookies.set('sb-refresh-token', '', { expires: new Date(0) })
+    
+    return response
   } catch (error) {
     console.error('Logout error:', error)
     return NextResponse.json({ error: 'Logout failed' }, { status: 500 })

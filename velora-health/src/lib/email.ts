@@ -2,18 +2,31 @@ import { getAdminSupabase } from './supabase'
 
 export async function sendEmail({ to, subject, html }: { to: string, subject: string, html: string }) {
   const supabase = getAdminSupabase()
-  if (!supabase) return { error: 'Supabase admin client not configured' }
+  
+  if (!supabase) {
+    console.error('Email Error: Supabase admin client not configured. Ensure SUPABASE_SERVICE_ROLE_KEY is set.')
+    return { error: 'Server configuration error (Email service not reachable)' }
+  }
 
   try {
     const { data, error } = await supabase.functions.invoke('send-email', {
-      body: { to, subject, html },
+      body: { 
+        to, 
+        subject, 
+        html,
+        fromEmail: process.env.AHASEND_SMTP_FROM || 'noreply@intima.love'
+      },
     })
 
-    if (error) throw error
+    if (error) {
+      console.error('Supabase Edge Function Error:', error)
+      return { error: error.message || 'Failed to send email via Supabase' }
+    }
+
     return { data }
   } catch (error: any) {
-    console.error('Edge Function Email Error:', error)
-    return { error: error.message }
+    console.error('Unexpected Email Error:', error)
+    return { error: error.message || 'An unexpected error occurred while sending email' }
   }
 }
 

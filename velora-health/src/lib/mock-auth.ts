@@ -1,7 +1,7 @@
 const users = new Map<string, { email: string; password: string; name: string; id: string }>()
 let currentSession: { email: string; id: string; name: string } | null = null
 
-export function mockSignUp(email: string, password: string, name?: string) {
+export function mockSignUp(email: string, password: string, name?: string, phone?: string) {
   if (users.has(email)) {
     return { error: { message: 'User already registered' } }
   }
@@ -10,7 +10,7 @@ export function mockSignUp(email: string, password: string, name?: string) {
   }
   const id = `mock-user-${Date.now()}`
   users.set(email, { email, password, name: name || '', id })
-  return { data: { user: { id, email, user_metadata: { full_name: name || '' } } }, error: null }
+  return { data: { user: { id, email, user_metadata: { full_name: name || '', phone: phone || '' } } }, error: null }
 }
 
 export function mockSignIn(email: string, password: string) {

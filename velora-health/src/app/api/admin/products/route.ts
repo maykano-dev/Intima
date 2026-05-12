@@ -46,9 +46,9 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { name, slug, description, benefits, usage_guide, material, price_ghs, compare_price_ghs, images, category_id, in_stock, is_featured, product_link, variants } = body
+    const { name, slug, description, benefits, usage_guide, material, price_ghs, price_cny, compare_price_ghs, images, category_id, in_stock, is_featured, product_link, variants } = body
 
-    if (!name || !price_ghs || !category_id) {
+    if (!name || (!price_ghs && !price_cny) || !category_id) {
       return NextResponse.json({ error: 'Name, price, and category are required' }, { status: 400 })
     }
 
@@ -64,6 +64,7 @@ export async function POST(request: Request) {
         usage_guide: usage_guide || '',
         material: material || '',
         price_ghs,
+        price_cny,
         compare_price_ghs: compare_price_ghs || null,
         images: images || [],
         product_link: product_link || null,
@@ -82,6 +83,7 @@ export async function POST(request: Request) {
         name: v.name,
         type: v.type || 'size',
         price_ghs: v.price_ghs || null,
+        price_cny: v.price_cny || null,
         in_stock: v.in_stock ?? true,
         image: v.image || null,
         sort_order: 0,
@@ -99,7 +101,7 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const body = await request.json()
-    const { id, name, slug, description, benefits, usage_guide, material, price_ghs, compare_price_ghs, images, category_id, in_stock, is_featured, product_link, variants } = body
+    const { id, name, slug, description, benefits, usage_guide, material, price_ghs, price_cny, compare_price_ghs, images, category_id, in_stock, is_featured, product_link, variants } = body
 
     if (!id) {
       return NextResponse.json({ error: 'Product ID required' }, { status: 400 })
@@ -113,6 +115,7 @@ export async function PATCH(request: Request) {
     if (usage_guide !== undefined) updates.usage_guide = usage_guide
     if (material !== undefined) updates.material = material
     if (price_ghs !== undefined) updates.price_ghs = price_ghs
+    if (price_cny !== undefined) updates.price_cny = price_cny
     if (compare_price_ghs !== undefined) updates.compare_price_ghs = compare_price_ghs
     if (images !== undefined) updates.images = images
     if (product_link !== undefined) updates.product_link = product_link
@@ -128,6 +131,7 @@ export async function PATCH(request: Request) {
           name: v.name,
           type: v.type || 'size',
           price_ghs: v.price_ghs || null,
+          price_cny: v.price_cny || null,
           in_stock: v.in_stock ?? true,
           image: v.image || null,
           sort_order: 0,

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
+import Modal from '@/components/ui/Modal'
+import Button from '@/components/ui/Button'
 
 interface Review {
   id: string
@@ -9,6 +11,7 @@ interface Review {
   rating: number
   content: string
   approved: boolean
+  admin_reply?: string
   created_at: string
   products?: { name: string; slug: string } | null
 }
@@ -18,6 +21,28 @@ export default function AdminReviews() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved'>('pending')
+  const [replyText, setReplyText] = useState<Record<string, string>>({})
+  const [confirmModal, setConfirmModal] = useState<{ open: boolean; title: string; message: string; onConfirm: () => void; isDanger?: boolean }>({
+    open: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  })
+
+  async function handleReply(id: string) {
+    if (!replyText[id]) return
+    try {
+      await fetch('/api/admin/reviews', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, admin_reply: replyText[id] }),
+      })
+      loadReviews()
+      setReplyText({ ...replyText, [id]: '' })
+    } catch {
+      setError('Failed to send reply')
+    }
+  }
 
   async function loadReviews() {
     setLoading(true)
@@ -48,13 +73,23 @@ export default function AdminReviews() {
   }
 
   async function deleteReview(id: string) {
-    if (!confirm('Delete this review?')) return
-    try {
-      const res = await fetch(`/api/admin/reviews?id=${id}`, { method: 'DELETE' })
-      if (res.ok) loadReviews()
-    } catch {
-      setError('Failed to delete')
-    }
+    setConfirmModal({
+      open: true,
+      title: 'Delete Review',
+      message: 'Are you sure you want to delete this review?',
+      isDanger: true,
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`/api/admin/reviews?id=${id}`, { method: 'DELETE' })
+          if (res.ok) {
+            loadReviews()
+            setConfirmModal(prev => ({ ...prev, open: false }))
+          }
+        } catch {
+          setError('Failed to delete')
+        }
+      }
+    })
   }
 
   if (loading) {
@@ -67,7 +102,7 @@ export default function AdminReviews() {
   }
 
   return (
-    <div>
+    <>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Reviews</h1>
         <div className="flex gap-2">
@@ -111,6 +146,30 @@ export default function AdminReviews() {
                 </span>
               </div>
               <p className="text-sm text-muted mb-3">{review.content}</p>
+
+              {review.admin_reply ? (
+                <div className="mb-4 p-4 rounded-xl bg-primary/5 border border-primary/10">
+                  <p className="text-[10px] uppercase font-bold text-primary mb-1">Your Reply</p>
+                  <p className="text-sm italic text-foreground">{review.admin_reply}</p>
+                </div>
+              ) : (
+                <div className="mb-4 space-y-2">
+                  <textarea
+                    placeholder="Write a public reply..."
+                    value={replyText[review.id] || ''}
+                    onChange={(e) => setReplyText({ ...replyText, [review.id]: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-card text-sm min-h-[60px] focus:ring-1 focus:ring-primary outline-none"
+                  />
+                  <button 
+                    onClick={() => handleReply(review.id)}
+                    disabled={!replyText[review.id]}
+                    className="text-xs px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-primary-dark disabled:opacity-50 transition-colors"
+                  >
+                    Post Reply
+                  </button>
+                </div>
+              )}
+
               <div className="flex gap-2">
                 <button
                   onClick={() => toggleApproval(review.id, review.approved)}
@@ -129,6 +188,35 @@ export default function AdminReviews() {
           ))}
         </div>
       )}
-    </div>
+
+      <Modal 
+        open={confirmModal.open} 
+        onClose={() => setConfirmModal(prev => ({ ...prev, open: false }))}
+        className="max-w-md"
+      >
+        <div className="text-center p-2">
+          <div className={cn(
+            "w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4",
+            confirmModal.isDanger ? "bg-danger/10 text-danger" : "bg-primary/10 text-primary"
+          )}>
+            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-bold mb-2 tracking-tight">{confirmModal.title}</h3>
+          <p className="text-sm text-muted mb-8 leading-relaxed">{confirmModal.message}</p>
+          <div className="flex gap-3">
+            <Button variant="secondary" fullWidth onClick={() => setConfirmModal(prev => ({ ...prev, open: false }))}>Cancel</Button>
+            <Button 
+              variant={confirmModal.isDanger ? "danger" : "primary"} 
+              fullWidth 
+              onClick={confirmModal.onConfirm}
+            >
+              Confirm
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    </>
   )
 }

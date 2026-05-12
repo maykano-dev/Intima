@@ -10,7 +10,8 @@ export const env = {
   supabaseUrl: getEnv('NEXT_PUBLIC_SUPABASE_URL'),
   supabaseAnonKey: getEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY'),
   supabaseServiceRoleKey: getEnv('SUPABASE_SERVICE_ROLE_KEY'),
-  paystackPublicKey: getEnv('NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY'),
-  paystackSecretKey: getEnv('PAYSTACK_SECRET_KEY'),
-  paystackCallbackUrl: getEnv('NEXT_PUBLIC_PAYSTACK_CALLBACK_URL'),
+  moolreUser: getEnv('MOOLRE_USER'),
+  moolrePubKey: getEnv('MOOLRE_PUB_KEY'),
+  moolreAccountNumber: getEnv('MOOLRE_ACCOUNT_NUMBER'),
+  moolreSecret: getEnv('MOOLRE_SECRET'),
 }

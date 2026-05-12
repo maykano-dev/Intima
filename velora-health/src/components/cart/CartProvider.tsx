@@ -19,27 +19,32 @@ type CartAction =
   | { type: 'SET_DRAWER'; payload: boolean }
   | { type: 'LOAD_CART'; payload: CartItem[] }
 
-interface CartContextType {
-  items: CartItem[]
-  isDrawerOpen: boolean
-  itemCount: number
-  subtotal: number
-  addItem: (item: Omit<CartItem, 'id' | 'quantity'>) => void
-  removeItem: (id: string) => void
-  updateQuantity: (id: string, quantity: number) => void
-  clearCart: () => void
-  toggleDrawer: () => void
-  openDrawer: () => void
-  closeDrawer: () => void
-}
+  interface CartContextType {
+    items: CartItem[]
+    isDrawerOpen: boolean
+    itemCount: number
+    subtotal: number
+    addItem: (item: Omit<CartItem, 'id' | 'quantity'>) => void
+    removeItem: (id: string) => void
+    updateQuantity: (id: string, quantity: number) => void
+    clearCart: () => void
+    toggleDrawer: () => void
+    openDrawer: () => void
+    closeDrawer: () => void
+  }
+
+  function cartItemKey(item: { product_id: string; variant_value?: string }) {
+    return `${item.product_id}__${item.variant_value || ''}`
+  }
 
 const CartContext = createContext<CartContextType | null>(null)
 
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case 'ADD_ITEM': {
+      const key = cartItemKey(action.payload)
       const existingIndex = state.items.findIndex(
-        (item) => item.product_id === action.payload.product_id
+        (item) => cartItemKey(item) === key
       )
       if (existingIndex >= 0) {
         const updated = [...state.items]

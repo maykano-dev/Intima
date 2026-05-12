@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getAdminSupabase, isSupabaseConfigured } from '@/lib/supabase'
-import { sendEmail, emailTemplates } from '@/lib/email'
+import { getSupabase, getAdminSupabase, isSupabaseConfigured } from '@/lib/supabase'
 
 export async function POST(request: Request) {
   try {
@@ -14,31 +13,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true })
     }
 
-    const supabase = getAdminSupabase()
-    if (!supabase) throw new Error('Admin Supabase not configured')
+    const supabase = getSupabase()
+    if (!supabase) throw new Error('Supabase not configured')
 
-    // Generate recovery link
-    const { data, error } = await supabase.auth.admin.generateLink({
-      type: 'recovery',
-      email,
-      options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback?next=/update-password`
-      }
+    // Get the origin for the redirect URL
+    const requestUrl = new URL(request.url)
+    const origin = requestUrl.origin
+    const redirectTo = `${origin}/auth/callback?next=/update-password`
+
+    // Trigger Supabase's built-in password reset email
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo,
     })
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 })
-    }
-
-    // Send the custom email via AhaSend
-    const { error: emailError } = await sendEmail({
-      to: email,
-      subject: 'Password Reset - Intima Wellness',
-      html: emailTemplates.recovery(data.properties.action_link)
-    })
-
-    if (emailError) {
-      return NextResponse.json({ error: emailError }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })

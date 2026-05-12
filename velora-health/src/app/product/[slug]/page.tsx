@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import type { Product, Review } from '@/types'
+import type { Product, Review, ProductVariant } from '@/types'
 import { useCart } from '@/components/cart/CartProvider'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, cn } from '@/lib/utils'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import ProductGallery from '@/components/product/ProductGallery'
@@ -19,6 +19,20 @@ export default function ProductPage() {
   const [reviews, setReviews] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
   const [added, setAdded] = useState(false)
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null)
+
+  const variantsByOption = useMemo(() => {
+    if (!product?.variants?.length) return {}
+    const map: Record<string, ProductVariant[]> = {}
+    for (const v of product.variants) {
+      const key = v.type || 'option'
+      if (!map[key]) map[key] = []
+      map[key].push(v)
+    }
+    return map
+  }, [product])
+
+  const mainImage = selectedVariant?.image || product?.images?.[0] || ''
 
   useEffect(() => {
     async function load() {
@@ -49,9 +63,12 @@ export default function ProductPage() {
     addItem({
       product_id: product.id,
       name: product.name,
-      price_ghs: product.price_ghs,
-      image: product.images[0] || '',
+      price_ghs: selectedVariant?.price_ghs || product.price_ghs,
+      image: selectedVariant?.image || product.images[0] || '',
       slug: product.slug,
+      variant_option: selectedVariant?.type || '',
+      variant_value: selectedVariant?.name || '',
+      variant_image: selectedVariant?.image || '',
     })
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
@@ -100,7 +117,7 @@ export default function ProductPage() {
       </nav>
 
       <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
-        <ProductGallery images={product.images} />
+        <ProductGallery images={[mainImage, ...product.images.filter(i => i !== mainImage)]} />
 
         <div className="flex flex-col">
           <span className="text-sm text-muted uppercase tracking-wider">
@@ -127,8 +144,8 @@ export default function ProductPage() {
           </div>
 
           <div className="flex items-baseline gap-3 mt-4">
-            <span className="text-3xl font-bold">{formatPrice(product.price_ghs)}</span>
-            {product.compare_price_ghs && (
+            <span className="text-3xl font-bold">{formatPrice(selectedVariant?.price_ghs || product.price_ghs)}</span>
+            {product.compare_price_ghs && !selectedVariant && (
               <>
                 <span className="text-lg text-muted line-through">{formatPrice(product.compare_price_ghs)}</span>
                 <Badge variant="success">Save {discount}%</Badge>
@@ -173,9 +190,37 @@ export default function ProductPage() {
             )}
           </div>
 
-          <div className="mt-8 flex flex-col sm:flex-row gap-3">
-            <Button variant="primary" size="lg" fullWidth onClick={handleAddToCart}>
-              {added ? 'Added to Cart!' : 'Add to Cart'}
+          {Object.keys(variantsByOption).length > 0 && (
+            <div className="mt-6 space-y-4">
+              {Object.entries(variantsByOption).map(([option, variants]) => (
+                <div key={option}>
+                  <h3 className="text-sm font-semibold capitalize mb-2">{option}</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {variants.map((v) => (
+                      <button
+                        key={v.name}
+                        type="button"
+                        onClick={() => setSelectedVariant(selectedVariant?.name === v.name && selectedVariant?.type === v.type ? null : v)}
+                        className={cn(
+                          'px-4 py-2 rounded-lg border text-sm font-medium transition-all',
+                          selectedVariant?.name === v.name && selectedVariant?.type === v.type
+                            ? 'border-primary bg-primary/10 text-primary'
+                            : 'border-border hover:border-muted'
+                        )}
+                      >
+                        {v.name}
+                        {v.price_ghs && <span className="ml-1.5 text-xs text-muted">({formatPrice(v.price_ghs)})</span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+            <Button variant="primary" size="lg" fullWidth onClick={handleAddToCart} disabled={Object.keys(variantsByOption).length > 0 && !selectedVariant}>
+              {Object.keys(variantsByOption).length > 0 && !selectedVariant ? 'Select a variant' : added ? 'Added to Cart!' : 'Add to Cart'}
             </Button>
           </div>
 

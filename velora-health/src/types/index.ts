@@ -28,8 +28,9 @@ export interface ProductVariant {
   id?: string
   product_id?: string
   name: string
-  type: 'size' | 'color' | 'material' | 'style'
+  type: string
   price_ghs?: number
+  price_cny?: number
   in_stock: boolean
   image?: string
   sort_order: number
@@ -53,6 +54,9 @@ export interface CartItem {
   slug: string
   delivery_profile?: 'local' | 'standard'
   lead_time?: string
+  variant_option?: string
+  variant_value?: string
+  variant_image?: string
 }
 
 export interface CustomerInfo {
@@ -89,6 +93,10 @@ export interface OrderItem {
   product_name: string
   quantity: number
   unit_price: number
+  variant_option?: string
+  variant_value?: string
+  variant_image?: string
+  product_link?: string
 }
 
 export interface BlogPost {

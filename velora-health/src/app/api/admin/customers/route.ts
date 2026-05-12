@@ -10,26 +10,35 @@ export async function GET() {
 
     if (profilesError) throw profilesError
 
-    const { data: banned, error: bannedError } = await getSupabaseAdmin()!
-      .from('banned_users')
-      .select('user_id')
+    let bannedIds = new Set<string>()
+    try {
+      const { data: banned, error: bannedError } = await getSupabaseAdmin()!
+        .from('banned_users')
+        .select('user_id')
 
-    if (bannedError) throw bannedError
-
-    const bannedIds = new Set((banned || []).map((b: { user_id: string }) => b.user_id))
-
-    const { data: orders, error: ordersError } = await getSupabaseAdmin()!
-      .from('orders')
-      .select('user_id, total')
-      .not('user_id', 'is', null)
-
-    if (ordersError) throw ordersError
+      if (!bannedError && banned) {
+        bannedIds = new Set(banned.map((b: { user_id: string }) => b.user_id))
+      }
+    } catch (err) {
+      console.warn('Banned users fetch failed:', err)
+    }
 
     const orderStats: Record<string, { count: number; total: number }> = {}
-    for (const o of orders || []) {
-      if (!orderStats[o.user_id]) orderStats[o.user_id] = { count: 0, total: 0 }
-      orderStats[o.user_id].count++
-      orderStats[o.user_id].total += Number(o.total)
+    try {
+      const { data: orders, error: ordersError } = await getSupabaseAdmin()!
+        .from('orders')
+        .select('user_id, total')
+        .not('user_id', 'is', null)
+
+      if (!ordersError && orders) {
+        for (const o of orders) {
+          if (!orderStats[o.user_id]) orderStats[o.user_id] = { count: 0, total: 0 }
+          orderStats[o.user_id].count++
+          orderStats[o.user_id].total += Number(o.total)
+        }
+      }
+    } catch (err) {
+      console.warn('Order stats fetch failed (likely missing user_id column in orders):', err)
     }
 
     const customers = (profiles || []).map((p: Record<string, unknown>) => ({

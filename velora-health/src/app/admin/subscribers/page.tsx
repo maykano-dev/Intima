@@ -1,6 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Modal from '@/components/ui/Modal'
+import Button from '@/components/ui/Button'
+import { cn } from '@/lib/utils'
 
 interface Subscriber {
   id: string
@@ -12,6 +15,12 @@ export default function AdminSubscribers() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [confirmModal, setConfirmModal] = useState<{ open: boolean; title: string; message: string; onConfirm: () => void; isDanger?: boolean }>({
+    open: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  })
 
   async function load() {
     setLoading(true)
@@ -28,13 +37,23 @@ export default function AdminSubscribers() {
   useEffect(() => { load() }, [])
 
   async function deleteSub(id: string) {
-    if (!confirm('Remove this subscriber?')) return
-    try {
-      const res = await fetch(`/api/admin/subscribers?id=${id}`, { method: 'DELETE' })
-      if (res.ok) load()
-    } catch {
-      setError('Failed to delete')
-    }
+    setConfirmModal({
+      open: true,
+      title: 'Remove Subscriber',
+      message: 'Are you sure you want to remove this subscriber from the list?',
+      isDanger: true,
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`/api/admin/subscribers?id=${id}`, { method: 'DELETE' })
+          if (res.ok) {
+            load()
+            setConfirmModal(prev => ({ ...prev, open: false }))
+          }
+        } catch {
+          setError('Failed to delete')
+        }
+      }
+    })
   }
 
   if (loading) {
@@ -47,7 +66,7 @@ export default function AdminSubscribers() {
   }
 
   return (
-    <div>
+    <>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Subscribers ({subscribers.length})</h1>
         <button onClick={load} className="px-4 py-2 rounded-lg border border-border text-sm hover:bg-secondary transition-colors">Refresh</button>
@@ -78,6 +97,35 @@ export default function AdminSubscribers() {
           <pre className="text-xs bg-background p-3 rounded-lg overflow-x-auto">{subscribers.map((s) => s.email).join('\n')}</pre>
         </div>
       )}
-    </div>
+
+      <Modal 
+        open={confirmModal.open} 
+        onClose={() => setConfirmModal(prev => ({ ...prev, open: false }))}
+        className="max-w-md"
+      >
+        <div className="text-center p-2">
+          <div className={cn(
+            "w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4",
+            confirmModal.isDanger ? "bg-danger/10 text-danger" : "bg-primary/10 text-primary"
+          )}>
+            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-bold mb-2 tracking-tight">{confirmModal.title}</h3>
+          <p className="text-sm text-muted mb-8 leading-relaxed">{confirmModal.message}</p>
+          <div className="flex gap-3">
+            <Button variant="secondary" fullWidth onClick={() => setConfirmModal(prev => ({ ...prev, open: false }))}>Cancel</Button>
+            <Button 
+              variant={confirmModal.isDanger ? "danger" : "primary"} 
+              fullWidth 
+              onClick={confirmModal.onConfirm}
+            >
+              Confirm
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    </>
   )
 }

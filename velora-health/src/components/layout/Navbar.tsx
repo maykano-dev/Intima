@@ -15,7 +15,7 @@ const navLinks = [
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [user, setUser] = useState<{ email?: string } | null>(null)
+  const [user, setUser] = useState<{ email?: string; role?: string } | null>(null)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const { itemCount, openDrawer } = useCart()
@@ -53,7 +53,7 @@ export default function Navbar() {
     await fetch('/api/auth/logout', { method: 'POST' })
     setUser(null)
     setUserMenuOpen(false)
-    router.push('/')
+    router.replace('/login')
     router.refresh()
   }
 
@@ -114,10 +114,12 @@ export default function Navbar() {
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                       Orders
                     </Link>
-                    <Link href="/admin" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#F2E8DF] hover:text-[#BFA075] hover:bg-[rgba(242,232,223,0.05)] transition-colors no-underline">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                      Admin
-                    </Link>
+                    {user.role === 'admin' && (
+                      <Link href="/admin" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#F2E8DF] hover:text-[#BFA075] hover:bg-[rgba(242,232,223,0.05)] transition-colors no-underline">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        Admin
+                      </Link>
+                    )}
                     <div className="border-t border-[rgba(242,232,223,0.1)] mt-1 pt-1">
                       <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#EF4444] hover:bg-[rgba(242,232,223,0.05)] transition-colors w-full text-left">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>

@@ -13,12 +13,10 @@ function RegisterForm() {
   
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [isVerifying, setIsVerifying] = useState(false)
-  const [resendLoading, setResendLoading] = useState(false)
-  const [resendSuccess, setResendSuccess] = useState('')
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault()
@@ -32,12 +30,16 @@ function RegisterForm() {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, phone, password }),
       })
+      
+      const data = await res.json()
+      
       if (res.ok) {
-        setIsVerifying(true)
+        // Since we are now using admin creation with auto-confirm
+        // we can just redirect to login
+        router.push(redirectTo ? `/login?redirect=${encodeURIComponent(redirectTo)}&registered=true` : "/login?registered=true")
       } else {
-        const data = await res.json()
         setError(data.error || 'Registration failed')
       }
     } catch {
@@ -47,70 +49,15 @@ function RegisterForm() {
     }
   }
 
-  async function handleResendEmail() {
-    setResendLoading(true)
-    setResendSuccess('')
-    try {
-      const res = await fetch('/api/auth/resend', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      })
-      if (res.ok) {
-        setResendSuccess('Confirmation email resent successfully!')
-      } else {
-        const data = await res.json()
-        setError(data.error || 'Failed to resend email')
-      }
-    } catch {
-      setError('Failed to resend. Please check your connection.')
-    } finally {
-      setResendLoading(false)
-    }
-  }
-
-  if (isVerifying) {
-    return (
-      <div className="text-center space-y-6 py-4">
-        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-        </div>
-        <h2 className="text-xl font-bold">Check your email</h2>
-        <p className="text-sm text-muted max-w-xs mx-auto">
-          We've sent a confirmation link to <span className="font-semibold text-foreground">{email}</span>. Please verify your account to continue.
-        </p>
-        
-        <div className="pt-4 space-y-3">
-          <Button 
-            onClick={handleResendEmail} 
-            variant="secondary" 
-            fullWidth 
-            loading={resendLoading}
-          >
-            Resend Email
-          </Button>
-          {resendSuccess && <p className="text-xs text-success">{resendSuccess}</p>}
-          <Link 
-            href={redirectTo ? `/login?redirect=${encodeURIComponent(redirectTo)}` : "/login"}
-            className="block text-sm text-primary hover:underline"
-          >
-            Already verified? Sign In
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <form onSubmit={handleRegister} className="space-y-4">
       <Input label="Full Name" value={name} onChange={(e) => setName(e.target.value)} required />
       <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+      <Input label="Phone Number" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required placeholder="e.g. 0244000000" />
       <Input label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required helperText="At least 6 characters" />
       {error && <p className="text-sm text-danger">{error}</p>}
       <Button type="submit" variant="primary" size="lg" fullWidth loading={loading}>
-        Send Confirmation Email
+        Create Account
       </Button>
     </form>
   )
