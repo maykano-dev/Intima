@@ -63,10 +63,12 @@ CREATE INDEX IF NOT EXISTS idx_banned_users_user ON banned_users(user_id);
 CREATE INDEX IF NOT EXISTS idx_customer_notes_user ON customer_notes(user_id);
 
 -- 8. TRIGGERS
+DROP TRIGGER IF EXISTS set_shipping_options_updated_at ON shipping_options;
 CREATE TRIGGER set_shipping_options_updated_at
   BEFORE UPDATE ON shipping_options
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS set_platform_settings_updated_at ON platform_settings;
 CREATE TRIGGER set_platform_settings_updated_at
   BEFORE UPDATE ON platform_settings
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -78,11 +80,13 @@ ALTER TABLE banned_users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE customer_notes ENABLE ROW LEVEL SECURITY;
 
 -- Public can view active shipping options
+DROP POLICY IF EXISTS "Public can view active shipping options" ON shipping_options;
 CREATE POLICY "Public can view active shipping options"
   ON shipping_options FOR SELECT
   USING (is_active = true);
 
 -- Admins can manage shipping options
+DROP POLICY IF EXISTS "Admins manage shipping options" ON shipping_options;
 CREATE POLICY "Admins manage shipping options"
   ON shipping_options FOR ALL
   USING (
@@ -90,12 +94,14 @@ CREATE POLICY "Admins manage shipping options"
   );
 
 -- Admins can view platform settings
+DROP POLICY IF EXISTS "Admins view platform settings" ON platform_settings;
 CREATE POLICY "Admins view platform settings"
   ON platform_settings FOR SELECT
   USING (
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
   );
 
+DROP POLICY IF EXISTS "Admins update platform settings" ON platform_settings;
 CREATE POLICY "Admins update platform settings"
   ON platform_settings FOR UPDATE
   USING (
@@ -103,6 +109,7 @@ CREATE POLICY "Admins update platform settings"
   );
 
 -- Admins manage banned users
+DROP POLICY IF EXISTS "Admins manage banned users" ON banned_users;
 CREATE POLICY "Admins manage banned users"
   ON banned_users FOR ALL
   USING (
@@ -110,6 +117,7 @@ CREATE POLICY "Admins manage banned users"
   );
 
 -- Admins manage customer notes
+DROP POLICY IF EXISTS "Admins manage customer notes" ON customer_notes;
 CREATE POLICY "Admins manage customer notes"
   ON customer_notes FOR ALL
   USING (

@@ -22,7 +22,7 @@ export async function GET(request: Request) {
 
     // Moolre status check response structure according to docs:
     // result.data contains txstatus (1=Successful, 0=Pending, 2=Failed)
-    const data = result.data as any
+    const data = result.data as Record<string, unknown>
     const txStatus = data?.txstatus !== undefined ? data.txstatus : result.status
     const transactionId = data?.transactionid || data?.transaction_id || order_id
 

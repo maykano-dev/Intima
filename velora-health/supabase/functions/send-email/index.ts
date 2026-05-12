@@ -11,11 +11,11 @@ serve(async (req) => {
   }
 
   try {
-    const { to, subject, html } = await req.json()
+    const { to, subject, html, fromEmail: customFrom } = await req.json()
     
     const apiKey = Deno.env.get('AHASEND_SECRET_KEY')
     const accountId = Deno.env.get('AHASEND_ACCOUNT_ID') || '55279744-a1b6-4920-91c5-8b2034111c59'
-    const fromEmail = Deno.env.get('AHASEND_SMTP_FROM') || 'noreply@info.intima.love'
+    const fromEmail = customFrom || Deno.env.get('AHASEND_SMTP_FROM') || 'noreply@intima.love'
 
     if (!apiKey) {
       throw new Error('AHASEND_SECRET_KEY not set in Supabase Secrets')
@@ -48,7 +48,10 @@ serve(async (req) => {
 
     if (!response.ok) {
       console.error('AhaSend API Error:', result)
-      throw new Error(result.message || 'Failed to send email via AhaSend API')
+      return new Response(
+        JSON.stringify({ error: result.message || 'Failed to send email via AhaSend API', details: result }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: response.status }
+      )
     }
 
     return new Response(

@@ -35,7 +35,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'Review ID required' }, { status: 400 })
     }
 
-    const updates: any = {}
+    const updates: Record<string, unknown> = {}
     if (approved !== undefined) updates.approved = approved
     if (admin_reply !== undefined) {
       updates.admin_reply = admin_reply

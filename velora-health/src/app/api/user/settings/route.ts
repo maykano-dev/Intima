@@ -25,7 +25,7 @@ export async function GET() {
     if (isSupabaseConfigured()) {
       const admin = getSupabaseAdmin()!
       if (admin) {
-        let { data, error } = await admin
+        const { data, error } = await admin
           .from('profiles')
           .select('*')
           .eq('id', userId)
@@ -37,7 +37,7 @@ export async function GET() {
             .upsert({ id: userId, full_name: '', phone: '', email: '' })
             .select()
             .single()
-          data = newProfile
+          if (newProfile) return NextResponse.json(newProfile)
         }
         if (data) return NextResponse.json(data)
       }
@@ -80,8 +80,10 @@ export async function PATCH(request: Request) {
           const res = await admin.from('profiles').upsert({ id: userId, ...updates }).select().single()
           data = res.data
           error = res.error
-        } catch (err: any) {
-          if (err?.message?.includes('email_notifications') || err?.code === '42703') {
+        } catch (err) {
+          const errorMsg = (err as { message?: string })?.message || ''
+          const errorCode = (err as { code?: string })?.code || ''
+          if (errorMsg.includes('email_notifications') || errorCode === '42703') {
             console.warn('email_notifications column missing, retrying without it...')
             delete updates.email_notifications
             const res = await admin.from('profiles').upsert({ id: userId, ...updates }).select().single()

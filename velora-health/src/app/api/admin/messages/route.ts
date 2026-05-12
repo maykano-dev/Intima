@@ -32,7 +32,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'Message ID required' }, { status: 400 })
     }
 
-    const updates: any = { read: read ?? true }
+    const updates: Record<string, unknown> = { read: read ?? true }
     if (admin_reply !== undefined) {
       updates.admin_reply = admin_reply
       updates.replied_at = new Date().toISOString()

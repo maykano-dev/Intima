@@ -80,8 +80,10 @@ export async function POST(request: Request) {
         .single()
       order = ord
       orderError = err
-    } catch (err: any) {
-      if (err?.message?.includes('user_id') || err?.code === '42703') {
+    } catch (err) {
+      const errorMsg = (err as { message?: string })?.message || ''
+      const errorCode = (err as { code?: string })?.code || ''
+      if (errorMsg.includes('user_id') || errorCode === '42703') {
         console.warn('user_id column missing in orders, retrying without it...')
         const { data: ord, error: err2 } = await getSupabaseAdmin()!
           .from('orders')
@@ -135,7 +137,7 @@ export async function POST(request: Request) {
       // If any variant columns are missing, retry with only the core columns
       if (itemsError.code === '42703') {
         console.warn('One or more variant columns missing in order_items, retrying with core columns only...')
-        const coreItems = orderItems.map(({ variant_option, variant_value, variant_image, ...core }: any) => core)
+        const coreItems = orderItems.map(({ variant_option, variant_value, variant_image, ...core }: Record<string, unknown>) => core)
         const { error: retryError } = await getSupabaseAdmin()!
           .from('order_items')
           .insert(coreItems)

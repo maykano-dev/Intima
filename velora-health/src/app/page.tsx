@@ -3,11 +3,12 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Product } from '@/types';
 import './landing.css';
 
 export default function LandingPage() {
   const [isAgeConfirmed, setIsAgeConfirmed] = useState(true);
-  const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [loadingFeatured, setLoadingFeatured] = useState(true);
 
   useEffect(() => {
@@ -84,7 +85,7 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section id="hero">
         <div className="hero-content">
-          <span className="hero-eyebrow reveal">Ghana's Most Discreet Wellness Boutique (Updated)</span>
+          <span className="hero-eyebrow reveal">Ghana&apos;s Most Discreet Wellness Boutique (Updated)</span>
           <h1 className="hero-title reveal">Your wellness, <br /><span>absolute</span> privacy.</h1>
           <p className="hero-desc reveal">Premium intimate wellness products delivered in unmarked packaging. No questions. No labels. Just you.</p>
           <div className="hero-btns reveal">
@@ -279,7 +280,7 @@ export default function LandingPage() {
             </div>
             <div className="why-item reveal">
               <h3 className="why-item-title">Curated Selection</h3>
-              <p className="why-item-desc">From premium intimate essentials to luxury connection tools, we source only the world's finest wellness brands.</p>
+              <p className="why-item-desc">From premium intimate essentials to luxury connection tools, we source only the world&apos;s finest wellness brands.</p>
             </div>
             <div className="why-item reveal">
               <h3 className="why-item-title">Body-Safe Materials</h3>

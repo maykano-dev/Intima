@@ -143,7 +143,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    const updates: any = {}
+    const updates: Record<string, unknown> = {}
     
     if (shipping_method) {
       if (['pending', 'paid'].includes(order.status)) {

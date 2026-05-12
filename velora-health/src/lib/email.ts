@@ -24,9 +24,10 @@ export async function sendEmail({ to, subject, html }: { to: string, subject: st
     }
 
     return { data }
-  } catch (error: any) {
-    console.error('Unexpected Email Error:', error)
-    return { error: error.message || 'An unexpected error occurred while sending email' }
+  } catch (error) {
+    const err = error as Error
+    console.error('Unexpected Email Error:', err)
+    return { error: err.message || 'An unexpected error occurred while sending email' }
   }
 }
 
@@ -49,7 +50,7 @@ export const emailTemplates = {
       <p style="background: rgba(242,232,223,0.05); padding: 15px; border-radius: 8px;">${message}</p>
     </div>
   `,
-  welcome: (email: string) => `
+  welcome: () => `
     <div style="background-color: #0A1410; color: #F2E8DF; font-family: sans-serif; padding: 40px; text-align: center; border-radius: 16px;">
       <h2 style="color: #BFA075; font-size: 24px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px;">The Inner Circle</h2>
       <p style="font-size: 16px; margin-bottom: 30px; color: #8A7F76;">Welcome to the Intima inner circle. You are now subscribed to receive our private wellness updates and collection drops.</p>
@@ -91,6 +92,6 @@ export async function sendSubscribeWelcome(email: string) {
   return sendEmail({
     to: email,
     subject: 'Welcome to the Intima Circle',
-    html: emailTemplates.welcome(email)
+    html: emailTemplates.welcome()
   })
 }

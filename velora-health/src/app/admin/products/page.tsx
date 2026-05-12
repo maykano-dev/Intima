@@ -22,6 +22,14 @@ interface Product {
   created_at: string
 }
 
+interface Review {
+  id: string
+  customer_name: string
+  rating: number
+  content: string
+  approved: boolean
+}
+
 export default function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -30,7 +38,7 @@ export default function AdminProducts() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [exchangeRate, setExchangeRate] = useState(0.52)
-  const [productReviews, setProductReviews] = useState<any[]>([])
+  const [productReviews, setProductReviews] = useState<Review[]>([])
 
   const [productType, setProductType] = useState<'imported' | 'available-in-gh'>('imported')
   const [shareOption, setShareOption] = useState(false)
@@ -239,7 +247,7 @@ export default function AdminProducts() {
     }
   }
 
-  async function handleEdit(product: any) {
+  async function handleEdit(product: Product & { variants?: Record<string, unknown>[], price_cny?: number, description?: string, benefits?: string, usage_guide?: string, product_link?: string, images?: string[], category_id?: string }) {
     setEditingId(product.id)
     const hasCny = product.price_cny && product.price_cny > 0
     setProductType(hasCny ? 'imported' : 'available-in-gh')
@@ -253,11 +261,11 @@ export default function AdminProducts() {
       price_ghs: product.price_ghs?.toString() || '',
       product_link: product.product_link || '',
       images: product.images || [],
-      variants: (product.variants || []).map((v: any) => ({
-        option: v.type || '',
-        value: v.name || '',
-        price: (v.price_ghs || v.price_cny || '').toString(),
-        image: v.image || '',
+      variants: (product.variants || []).map((v: Record<string, unknown>) => ({
+        option: (v.type as string) || '',
+        value: (v.name as string) || '',
+        price: ((v.price_ghs as number) || (v.price_cny as number) || '').toString(),
+        image: (v.image as string) || '',
       })),
       category_id: product.category_id || 'vibrators',
       in_stock: product.in_stock,
@@ -779,7 +787,7 @@ export default function AdminProducts() {
                     ) : (
                       <div className="space-y-3 max-h-[300px] overflow-y-auto no-scrollbar pr-2">
                         {productReviews.map((rev) => (
-                          <div key={rev.id} className="p-4 rounded-xl border border-border bg-card space-y-2">
+                          <div key={rev.id as string} className="p-4 rounded-xl border border-border bg-card space-y-2">
                             <div className="flex items-start justify-between">
                               <div>
                                 <p className="text-xs font-bold">{rev.customer_name}</p>
@@ -807,7 +815,7 @@ export default function AdminProducts() {
           {/* Footer */}
           <div className="p-6 border-t border-border bg-surface/5 flex items-center justify-end gap-3">
             <button onClick={resetForm} className="px-6 py-2.5 rounded-xl border border-border text-sm font-medium hover:bg-secondary transition-all">Discard</button>
-            <Button type="submit" variant="primary" loading={saving} onClick={(e) => handleSubmit(e as any)} className="px-10 py-2.5 shadow-lg shadow-primary/20">
+            <Button type="submit" variant="primary" loading={saving} onClick={(e) => handleSubmit(e as unknown as React.FormEvent)} className="px-10 py-2.5 shadow-lg shadow-primary/20">
               {editingId ? 'Update Product' : 'Save Product'}
             </Button>
           </div>
@@ -860,8 +868,8 @@ export default function AdminProducts() {
                   <td className="p-5">
                     <div className="flex items-center gap-4">
                       <div className="w-14 h-14 rounded-2xl bg-secondary/10 border border-border overflow-hidden shadow-sm">
-                        {(p as any).images?.[0] ? (
-                          <img src={(p as any).images[0]} className="w-full h-full object-cover" />
+                        {(p as unknown as { images?: string[] }).images?.[0] ? (
+                          <img src={(p as unknown as { images: string[] }).images[0]} className="w-full h-full object-cover" alt={p.name} />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-muted">
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

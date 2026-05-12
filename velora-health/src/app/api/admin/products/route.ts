@@ -13,7 +13,7 @@ export async function GET() {
 
     const productIds = (data || []).map((item: Record<string, unknown>) => item.id).filter(Boolean)
 
-    let variantsMap: Record<string, unknown[]> = {}
+    const variantsMap: Record<string, unknown[]> = {}
     if (productIds.length > 0) {
       const { data: variants } = await getSupabaseAdmin()!
         .from('product_variants')

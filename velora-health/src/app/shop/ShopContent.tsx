@@ -167,7 +167,7 @@ export default function ShopContent() {
                       <button
                         key={option.id}
                         onClick={() => {
-                          setSortBy(option.id as any)
+                          setSortBy(option.id as 'popularity' | 'price-asc' | 'price-desc' | 'newest')
                           setSortMenuOpen(false)
                         }}
                         className={cn(
